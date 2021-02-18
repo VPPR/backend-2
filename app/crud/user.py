@@ -13,6 +13,11 @@ def authenticate(email:str, password:str) -> Optional[User]:
 
 def signup(user: UserCreate) -> User:
     password=get_password_hash(user.password)
-    db_user=User(user.fullname,user.email,user.phone,user.is_admin,password)
+    db_user=User(
+        fullname=user.fullname,
+        email=user.email,
+        phone=user.phone,
+        is_admin=user.is_admin,
+        password=password)
     db_user.save()
     return db_user
