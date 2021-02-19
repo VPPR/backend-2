@@ -6,8 +6,9 @@ from app.core.security import get_password_hash, verify_password
 def authenticate(email:str, password:str) -> Optional[User]:
     try:
         user = User.objects(email=email).first()
-        return user if verify_password(password,user.password) else None
-        
+        if user:
+            return user if verify_password(password,user.password) else None
+        raise HTTPException(status_code=400,detail="User doesnt exist")
     except Exception as e:
         print(e)
         raise HTTPException(status_code=401,detail=e.detail)
