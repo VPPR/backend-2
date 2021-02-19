@@ -9,6 +9,7 @@ def authenticate(email:str, password:str) -> Optional[User]:
         return user if verify_password(password,user.password) else None
         
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=401,detail=e.detail)
 
 def signup(user: UserCreate) -> User:
