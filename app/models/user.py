@@ -17,3 +17,4 @@ class User(Document):
     phone = StringField(validation=is_phone_number)
     is_admin = BooleanField(required=True)
     password = StringField(required=True)
+    is_active = BooleanField(default=False)
