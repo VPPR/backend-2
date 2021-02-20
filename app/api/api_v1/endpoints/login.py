@@ -1,8 +1,9 @@
+from mongoengine.errors import NotUniqueError
 from app.core.config import settings
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.schema.token import Token
 from app.crud.user import authenticate, signup
@@ -36,6 +37,11 @@ def user_signup(user: UserCreate = Body(...)) -> UserSchema:
         return db_user
     except DuplicateKeyError as inst:
         raise HTTPException(400, inst.details)
+    except NotUniqueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='User with this email already exists'
+        )
 
 
 @router.get('/test', response_model=UserSchema)
