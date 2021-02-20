@@ -10,13 +10,13 @@ class UserBase(BaseModel):
     phone: Optional[str] = None
     is_admin: bool = False
 
-    @validator('phone')
+    @validator("phone")
     def phone_validator(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
-            if v.isnumeric() and v.startswith(('6', '7', '8', '9')) and len(v) == 10:
+            if v.isnumeric() and v.startswith(("6", "7", "8", "9")) and len(v) == 10:
                 return v
             else:
-                raise ValueError('Phone number not valid')
+                raise ValueError("Phone number not valid")
         return v
 
 

@@ -3,11 +3,11 @@ from decouple import config
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = '/api/v1'
-    MONGO_DETAILS: str = config('MONGO_DETAILS')
+    API_V1_STR: str = "/api/v1"
+    MONGO_DETAILS: str = config("MONGO_DETAILS")
     TOKEN_EXPIRY: int = 3600
-    ALGORITHM: str = 'HS256'
-    SECRET_KEY = config('SECRET_KEY')
+    ALGORITHM: str = "HS256"
+    SECRET_KEY = config("SECRET_KEY")
 
 
 settings = Settings()
