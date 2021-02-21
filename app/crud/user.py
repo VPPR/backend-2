@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi.exceptions import HTTPException
 
 from app.models.user import User
-from app.schema.user import UserCreate, UserInDB, User as UserSchema
+from app.schema.user import UserCreate
 from app.core.security import get_password_hash, verify_password
 
 

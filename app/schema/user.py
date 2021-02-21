@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, validator
-
+from bson.objectid import ObjectId
 
 # Shared properties
 class UserBase(BaseModel):
@@ -31,21 +31,20 @@ class UserCreate(UserBase):
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    password: Optional[str] = None
+    password: Optional[str]
 
 
-class UserInDBBase(UserBase):
-    _id: Optional[str] = None
+class User(UserBase):
+    id: Any
+
+    @validator("id")
+    def validate_id(cls, id):
+        return str(id)
 
     class Config:
         orm_mode = True
 
 
-# Additional properties to return via API
-class User(UserInDBBase):
-    pass
-
-
 # Additional properties stored in DB
-class UserInDB(UserInDBBase):
+class UserInDB(User):
     password: str

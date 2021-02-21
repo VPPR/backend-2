@@ -1,3 +1,4 @@
+from app.models.user import User
 from mongoengine.errors import NotUniqueError
 from app.core.config import settings
 from datetime import timedelta
@@ -29,7 +30,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
 
 
 @router.post("/signup", response_model=UserSchema)
-def user_signup(user: UserCreate = Body(...)) -> UserSchema:
+def user_signup(user: UserCreate = Body(...)) -> User:
     try:
         db_user = signup(user)
         return db_user
