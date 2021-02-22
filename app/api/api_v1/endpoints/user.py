@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from app.utils.validators import is_phone_valid
 from fastapi.params import Body, Path
 from pydantic.networks import EmailStr
@@ -42,8 +43,37 @@ def update_self(
     user.save()
     return user
 
+
 @router.get("/{id}", response_model=UserSchema)
-def get_user_by_id(user: User = Depends(get_current_admin),
-    id:str = Path(...)) -> User:
-    queriedUser = User.objects(id=id).first()
-    return queriedUser
+def get_user_by_id(
+    user: User = Depends(get_current_admin), id: str = Path(...)
+) -> User:
+    queried_user = User.objects(id=id).first()
+    if queried_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User doesnt exist")
+    return queried_user
+
+
+@router.put("/{id}", response_model=UserSchema)
+def update_user_by_id(
+    user: User = Depends(get_current_admin),
+    id: str = Path(...),
+    update: UserUpdate = Body(...),
+) -> User:
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid Id")
+    queried_user: User = User.objects(id=id).first()
+    if queried_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User doesnt exist")
+    if update.fullname is not None:
+        queried_user.fullname = update.fullname
+    if update.email is not None:
+        queried_user.email = update.email
+    if update.phone is not None and is_phone_valid(update.phone):
+        queried_user.phone = update.phone
+    if update.password is not None:
+        queried_user.password = get_password_hash(update.password)
+    if update.is_admin is not None:
+        queried_user.is_admin = update.is_admin
+    queried_user.save()
+    return queried_user

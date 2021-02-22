@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     fullname: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    is_admin: bool = False
+    is_admin: Optional[bool] = None
 
     @validator("phone")
     def phone_validator(cls, v: Optional[str]) -> Optional[str]:
