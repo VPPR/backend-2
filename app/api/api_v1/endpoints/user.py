@@ -1,9 +1,9 @@
 from app.utils.validators import is_phone_valid
-from fastapi.params import Body
+from fastapi.params import Body, Path
 from pydantic.networks import EmailStr
 from app.schema.response import Response
 from fastapi.exceptions import HTTPException
-from app.core.security import get_current_user, get_password_hash
+from app.core.security import get_current_admin, get_current_user, get_password_hash
 from fastapi.param_functions import Depends
 from app.models.user import User
 from fastapi import APIRouter, status
@@ -41,3 +41,9 @@ def update_self(
         user.password = get_password_hash(password)
     user.save()
     return user
+
+@router.get("/{id}", response_model=UserSchema)
+def get_user_by_id(user: User = Depends(get_current_admin),
+    id:str = Path(...)) -> User:
+    queriedUser = User.objects(id=id).first()
+    return queriedUser
