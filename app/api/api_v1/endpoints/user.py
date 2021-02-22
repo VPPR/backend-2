@@ -77,3 +77,13 @@ def update_user_by_id(
         queried_user.is_admin = update.is_admin
     queried_user.save()
     return queried_user
+
+@router.delete("/{id}", response_model=UserSchema)
+def delete_user_by_id(user:User = Depends(get_current_admin),
+    id: str = Path(...)
+) -> User:
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid Id")
+    queried_user = User.objects(id=id).first()
+    queried_user.delete()
+    return queried_user
