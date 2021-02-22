@@ -1,8 +1,10 @@
 from fastapi import APIRouter, File, UploadFile, Body, Depends, HTTPException, status
+from pydantic import utils
 from app.core.security import get_current_user
 import io
 import pandas
 
+from .utils import ziputils
 from zipfile import ZipFile
 
 router = APIRouter()
@@ -18,6 +20,8 @@ async def upload_zip(
     zipfile = ZipFile(io.BytesIO(file))
     for i in zipfile.namelist():
         folder, filename = i.split("/")
+        if folder in ["ACTIVITY_MINUTE", "BODY", "HEARTRATE_AUTO", "USER"]:
+            continue
         if filename:
             print(folder, filename)
             try:
@@ -33,4 +37,13 @@ async def upload_zip(
                     detail="wrong password for zip file",
                 )
             df = pandas.read_csv(io.BytesIO(fileobj))
-            data = df.to_dict("records")
+            if folder == "ACTIVITY":
+                ziputils.activity(df)
+            elif folder == "SLEEP":
+                ziputils.sleep(df)
+            elif folder == "HEARTRATE":
+                ziputils.heartrate(df)
+            elif folder == "SPORT":
+                ziputils.sport(df)
+            elif folder == "ACTIVITY_STAGE":
+                ziputils.activity_stage(df)
