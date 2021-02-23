@@ -18,9 +18,8 @@ oauth2_scheme = OAuth2PasswordBearer(
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 
-def create_access_token(subject: Union[str, Any]):
-    expire = datetime.utcnow() + timedelta(seconds=settings.TOKEN_EXPIRY)
-    to_encode = {"exp": expire, "subject": str(subject)}
+def create_access_token(subject: Union[str, Any], exp: datetime):
+    to_encode = {"exp": exp, "subject": str(subject)}
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
