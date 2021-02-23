@@ -38,31 +38,22 @@ Deployment
             <b>Deployed Site</b> 
         </td>
         <td>
-            :
-        </td>
-        <td>
             <a href="https://vppr-test.herokuapp.com/">https://vppr-test.herokuapp.com/</a>
         </td>
     </tr>
     <tr>
-        <td style="border:0px">
+        <td>
             <b>Swagger UI</b> 
         </td>
-        <td  style="border:0px">
-            :
-        </td>
-        <td style="border:0px">
+        <td>
             <a href="https://vppr-test.herokuapp.com/docs">https://vppr-test.herokuapp.com/docs</a>
         </td>
     </tr>
     <tr>
-        <td style="border:0px">
+        <td>
             <b>Redoc</b> 
         </td>
-        <td style="border:0px">
-            :
-        </td>
-        <td style="border:0px">
+        <td>
             <a  href="https://vppr-test.herokuapp.com/redoc">https://vppr-test.herokuapp.com/redoc</a>
         </td>
     </tr>
