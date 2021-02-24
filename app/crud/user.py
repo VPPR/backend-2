@@ -29,6 +29,7 @@ def signup(user: UserCreate) -> User:
         phone=user.phone,
         is_admin=user.is_admin,
         password=password,
+        is_active=True if not user.is_admin else False
     )
     db_user.save()
     return db_user
