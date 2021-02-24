@@ -49,6 +49,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     user = User.objects(id=token_data.subject).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=409, detail="User Inactive")        
     return user
 
 

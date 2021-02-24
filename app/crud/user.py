@@ -10,11 +10,15 @@ def authenticate(email: str, password: str) -> Optional[User]:
     try:
         user = User.objects(email=email).first()
         if user:
-            return user if verify_password(password, user.password) else None
-        raise HTTPException(status_code=400, detail="User doesnt exist")
+            if not verify_password(password, user.password):
+                raise HTTPException(status_code=401,detail="Incorrect Password")
+            if not user.is_active:
+                raise HTTPException(status_code=409, detail="User Inactive")
+            return user
+        raise HTTPException(status_code=404, detail="User doesnt exist")
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=401, detail=e.detail)
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
 def signup(user: UserCreate) -> User:
