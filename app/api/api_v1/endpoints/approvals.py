@@ -21,16 +21,18 @@ def get_approval_entries(user: User = Depends(get_current_admin)):
 @router.get("/{id}", response_model=UserSchema)
 def approve_user_by_id(user: User = Depends(get_current_admin), id: str = Path(...)):
     if not ObjectId.is_valid(id):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid Id")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Id"
+        )
     approval = Approval.objects(user=id).first()
     if not approval:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="No approval request found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="No approval request found"
         )
     approved_user = approval.user
     if approved_user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail="User already has privileges",
         )
     approved_user.is_active = True

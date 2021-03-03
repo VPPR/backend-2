@@ -32,15 +32,12 @@ def signup(user: UserCreate) -> User:
             phone=user.phone,
             is_admin=user.is_admin,
             password=password,
+            is_active=True if not user.is_admin else False,
         )
-        if user.is_admin:
-            db_user.is_active = False
-            db_user.save()
-            Approval(user=db_user).save()
-        else:
-            db_user.is_active = True
-
         db_user.save()
+        if user.is_admin:
+            Approval(user=db_user).save()
+
     except ValidationError as e:
         print(e.__dict__)
         raise HTTPException(
