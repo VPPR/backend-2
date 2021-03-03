@@ -9,7 +9,7 @@ class UserBase(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     is_admin: Optional[bool] = None
-
+    is_active: Optional[bool] = None
     @validator("phone")
     def phone_validator(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
@@ -27,6 +27,7 @@ class UserCreate(UserBase):
     password: str
     is_admin: bool
     phone: str
+    is_active: bool
 
 
 # Properties to receive via API on update
@@ -36,7 +37,7 @@ class UserUpdate(UserBase):
 
 class User(UserBase):
     id: Any
-
+    is_active: bool
     @validator("id")
     def validate_id(cls, id):
         return str(id)
