@@ -27,7 +27,6 @@ class UserCreate(UserBase):
     password: str
     is_admin: bool
     phone: str
-    is_active: bool
 
 
 # Properties to receive via API on update
