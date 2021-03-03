@@ -8,7 +8,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     expiry: datetime
-    
 
 
 class TokenPayload(BaseModel):

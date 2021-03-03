@@ -50,7 +50,9 @@ def get_user_by_id(
 ) -> User:
     queried_user = User.objects(id=id).first()
     if queried_user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User doesnt exist")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User doesnt exist"
+        )
     return queried_user
 
 
@@ -64,7 +66,9 @@ def update_user_by_id(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid Id")
     queried_user: User = User.objects(id=id).first()
     if queried_user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "User doesnt exist")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User doesnt exist"
+        )
     if update.fullname is not None:
         queried_user.fullname = update.fullname
     if update.email is not None:
@@ -78,9 +82,10 @@ def update_user_by_id(
     queried_user.save()
     return queried_user
 
+
 @router.delete("/{id}", response_model=UserSchema)
-def delete_user_by_id(user:User = Depends(get_current_admin),
-    id: str = Path(...)
+def delete_user_by_id(
+    user: User = Depends(get_current_admin), id: str = Path(...)
 ) -> User:
     if not ObjectId.is_valid(id):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid Id")

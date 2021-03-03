@@ -20,10 +20,11 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     OAuth2 compatible token login, get an access token for future requests
     """
     user = authenticate(email=form_data.username, password=form_data.password)
-    access_token_expires =  datetime.utcnow() + timedelta(seconds=settings.TOKEN_EXPIRY)
-    return Token(access_token=create_access_token(user.id,access_token_expires),
+    access_token_expires = datetime.utcnow() + timedelta(seconds=settings.TOKEN_EXPIRY)
+    return Token(
+        access_token=create_access_token(user.id, access_token_expires),
         token_type="Bearer",
-        expiry=access_token_expires
+        expiry=access_token_expires,
     )
 
 

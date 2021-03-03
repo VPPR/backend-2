@@ -13,7 +13,7 @@ def authenticate(email: str, password: str) -> Optional[User]:
         user = User.objects(email=email).first()
         if user:
             if not verify_password(password, user.password):
-                raise HTTPException(status_code=401,detail="Incorrect Password")
+                raise HTTPException(status_code=401, detail="Incorrect Password")
             if not user.is_active:
                 raise HTTPException(status_code=409, detail="User Inactive")
             return user
@@ -32,18 +32,19 @@ def signup(user: UserCreate) -> User:
             phone=user.phone,
             is_admin=user.is_admin,
             password=password,
-            
         )
         if user.is_admin:
-            db_user.is_active=False
+            db_user.is_active = False
             db_user.save()
             Approval(user=db_user).save()
         else:
-            db_user.is_active=True
+            db_user.is_active = True
 
         db_user.save()
     except ValidationError as e:
         print(e.__dict__)
-        raise HTTPException (status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,detail="Fuck you")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Fuck you"
+        )
 
     return db_user

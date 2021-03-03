@@ -10,6 +10,7 @@ class UserBase(BaseModel):
     phone: Optional[str] = None
     is_admin: Optional[bool] = None
     is_active: Optional[bool] = None
+
     @validator("phone")
     def phone_validator(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
@@ -37,6 +38,7 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: Any
     is_active: bool
+
     @validator("id")
     def validate_id(cls, id):
         return str(id)
