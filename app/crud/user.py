@@ -15,7 +15,7 @@ def authenticate(email: str, password: str) -> Optional[User]:
             if not verify_password(password, user.password):
                 raise HTTPException(status_code=401, detail="Incorrect Password")
             if not user.is_active:
-                raise HTTPException(status_code=409, detail="User Inactive")
+                raise HTTPException(status_code=403, detail="User Inactive")
             return user
         raise HTTPException(status_code=404, detail="User doesnt exist")
     except Exception as e:
