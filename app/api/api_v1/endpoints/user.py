@@ -13,9 +13,9 @@ from app.schema.user import User as UserSchema, UserUpdate
 router = APIRouter()
 
 
-@router.get("/self", response_model=UserSchema)
-def get_self(user: User = Depends(get_current_user)) -> User:
-    return user
+@router.get("/self", response_model=Response)
+def get_self(user: User = Depends(get_current_user)) -> Response:
+    return Response(message="Data retrieved successfully", detail=UserSchema.from_orm(user))
 
 
 @router.delete("/self", response_model=UserSchema)

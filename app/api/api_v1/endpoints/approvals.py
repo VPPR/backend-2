@@ -18,7 +18,7 @@ def get_approval_entries(user: User = Depends(get_current_admin)):
     return [f for f in Approval.objects().scalar("user")]
 
 
-@router.get("/{id}", response_model=UserSchema)
+@router.get("/{id}", response_model=Response)
 def approve_user_by_id(user: User = Depends(get_current_admin), id: str = Path(...)):
     if not ObjectId.is_valid(id):
         raise HTTPException(
@@ -39,5 +39,4 @@ def approve_user_by_id(user: User = Depends(get_current_admin), id: str = Path(.
     approved_user.save()
     approval.delete()
     # print(UserSchema.from_orm(approved_user))
-    # return {"message":"User approved", "detail":UserSchema.from_orm(approved_user)}
-    return approved_user
+    return Response(message="User approved", detail=UserSchema.from_orm(approved_user))
