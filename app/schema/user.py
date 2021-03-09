@@ -1,22 +1,23 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, validator
-
+from bson.objectid import ObjectId
 
 # Shared properties
 class UserBase(BaseModel):
     fullname: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    is_admin: bool = False
+    is_admin: Optional[bool] = None
+    is_active: Optional[bool] = None
 
-    @validator('phone')
+    @validator("phone")
     def phone_validator(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
-            if v.isnumeric() and v.startswith(('6', '7', '8', '9')) and len(v) == 10:
+            if v.isnumeric() and v.startswith(("6", "7", "8", "9")) and len(v) == 10:
                 return v
             else:
-                raise ValueError('Phone number not valid')
+                raise ValueError("Phone number not valid")
         return v
 
 
@@ -31,21 +32,21 @@ class UserCreate(UserBase):
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    password: Optional[str] = None
+    password: Optional[str]
 
 
-class UserInDBBase(UserBase):
-    _id: Optional[str] = None
+class User(UserBase):
+    id: Any
+    is_active: bool
+
+    @validator("id")
+    def validate_id(cls, id):
+        return str(id)
 
     class Config:
         orm_mode = True
 
 
-# Additional properties to return via API
-class User(UserInDBBase):
-    pass
-
-
 # Additional properties stored in DB
-class UserInDB(UserInDBBase):
+class UserInDB(User):
     password: str

@@ -5,10 +5,10 @@ from mongoengine.errors import ValidationError
 def is_phone_number(phone: str):
     if (
         not phone.isnumeric()
-        or not phone.startswith(('6', '7', '8', '9'))
+        or not phone.startswith(("6", "7", "8", "9"))
         or not len(phone) == 10
     ):
-        raise ValidationError('Not a valid phone number')
+        raise ValidationError("Not a valid phone number")
 
 
 class User(Document):
