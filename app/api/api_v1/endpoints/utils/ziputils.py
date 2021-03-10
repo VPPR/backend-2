@@ -6,7 +6,7 @@ def activity(df: pandas.DataFrame):
 def sleep(df: pandas.DataFrame):
     print(df.head())
 
-def heartrate(df: pandas.DataFrame):
+def heartrate_auto(df: pandas.DataFrame):
     print(df.head())
 
 def sport(df: pandas.DataFrame):

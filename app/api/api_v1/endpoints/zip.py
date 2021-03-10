@@ -20,10 +20,9 @@ async def upload_zip(
     zipfile = ZipFile(io.BytesIO(file))
     for i in zipfile.namelist():
         folder, filename = i.split("/")
-        if folder in ["ACTIVITY_MINUTE", "BODY", "HEARTRATE_AUTO", "USER"]:
+        if folder in ["ACTIVITY_MINUTE", "BODY", "HEARTRATE", "USER"]:
             continue
         if filename:
-            print(folder, filename)
             try:
                 fileobj = zipfile.read(
                     name=folder + "/" + filename, pwd=bytes(zip_password, encoding="UTF-8")
@@ -41,8 +40,8 @@ async def upload_zip(
                 ziputils.activity(df)
             elif folder == "SLEEP":
                 ziputils.sleep(df)
-            elif folder == "HEARTRATE":
-                ziputils.heartrate(df)
+            elif folder == "HEARTRATE_AUTO":
+                ziputils.heartrate_auto(df)
             elif folder == "SPORT":
                 ziputils.sport(df)
             elif folder == "ACTIVITY_STAGE":
