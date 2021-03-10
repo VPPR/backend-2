@@ -1,6 +1,5 @@
 from mongoengine import Document
 from mongoengine.fields import FloatField, IntField, LongField, StringField
-from typing_extensions import Required
 
 class Activity(Document):
     date = StringField(required=True)
@@ -29,8 +28,8 @@ class Sport(Document):
 
 class ActivityStage(Document):
     date = StringField(required=True)
-    start = StringField(required=True)
-    stop = StringField(required=True)
+    activity_start_time = StringField(required=True)
+    activity_stop_time = StringField(required=True)
     distance = IntField(required=True)
     calories = IntField(required=True)
     steps = IntField(required=True)

@@ -4,7 +4,7 @@ from app.core.security import get_current_user
 import io
 import pandas
 
-from .utils import ziputils
+from app.api.api_v1.endpoints.utils import ziputils
 from zipfile import ZipFile
 
 router = APIRouter()
