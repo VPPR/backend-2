@@ -1,3 +1,4 @@
+from typing import List
 from bson.objectid import ObjectId
 from app.utils.validators import is_phone_valid
 from fastapi.params import Body, Path
@@ -12,6 +13,10 @@ from app.schema.user import User as UserSchema, UserUpdate
 
 router = APIRouter()
 
+@router.get("/", response_model=List[UserSchema])
+def get_users(_:User = Depends(get_current_admin), skip:int = 0, limit: int = 100):
+    return [UserSchema.from_orm(f) for f in User.objects().skip(skip).limit(limit)]
+    
 
 @router.get("/self", response_model=Response)
 def get_self(user: User = Depends(get_current_user)) -> Response:
