@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, validator
-from bson.objectid import ObjectId
 
 # Shared properties
 class UserBase(BaseModel):

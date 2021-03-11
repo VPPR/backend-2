@@ -1,14 +1,9 @@
 from typing import Any, Union
-from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import HTTPException, status
 from app.core.config import settings
-from app.models.user import User
-from app.schema.token import TokenPayload
 from jose import jwt
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from pydantic import ValidationError
+from datetime import datetime
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"

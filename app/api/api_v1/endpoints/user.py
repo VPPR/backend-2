@@ -1,12 +1,10 @@
 from app import crud
 from typing import List
 from bson.objectid import ObjectId
-from app.utils.validators import is_phone_valid
 from fastapi.params import Body, Path
 from pydantic.networks import EmailStr
 from app.schema.response import Response
 from fastapi.exceptions import HTTPException
-from app.core.security import get_password_hash
 from app.api.deps import get_current_user, get_current_admin
 from fastapi.param_functions import Depends
 from app.models.user import User

@@ -5,7 +5,7 @@ from mongoengine.errors import ValidationError
 from fastapi import status
 from app.models.user import User
 from app.models.admin_approval import Approval
-from app.schema.user import UserCreate, UserUpdate, User as UserSchema, UserUpdateSelf
+from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
 from app.core.security import get_password_hash, verify_password
 
 
