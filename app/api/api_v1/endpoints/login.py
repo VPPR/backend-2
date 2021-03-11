@@ -7,8 +7,9 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.schema.token import Token
-from app.crud.user import authenticate, signup
-from app.core.security import create_access_token, get_current_user
+from app import crud
+from app.core.security import create_access_token
+from app.api.deps import get_current_user
 from app.schema.user import UserCreate, User as UserSchema
 
 router = APIRouter()
@@ -19,7 +20,8 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     """
     OAuth2 compatible token login, get an access token for future requests
     """
-    user = authenticate(email=form_data.username, password=form_data.password)
+
+    user = crud.user.authenticate(form_data.username, form_data.password)
     access_token_expires = datetime.utcnow() + timedelta(seconds=settings.TOKEN_EXPIRY)
     return Token(
         access_token=create_access_token(user.id, access_token_expires),
@@ -31,7 +33,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
 @router.post("/signup", response_model=UserSchema)
 def user_signup(user: UserCreate = Body(...)) -> User:
     try:
-        db_user = signup(user)
+        db_user = crud.user.create(user)
         return db_user
     except NotUniqueError as e:
         raise HTTPException(

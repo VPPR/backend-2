@@ -3,7 +3,7 @@ from bson.objectid import ObjectId
 from fastapi.params import Body, Path
 from app.schema.response import Response
 from fastapi.exceptions import HTTPException
-from app.core.security import get_current_admin
+from app.api.deps import get_current_admin
 from fastapi.param_functions import Depends
 from app.models.user import User
 from app.models.admin_approval import Approval
