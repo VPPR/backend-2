@@ -2,6 +2,7 @@ import pandas
 from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
 
 def activity(df: pandas.DataFrame):
+    records = []
     for record in df.to_dict('records'):
         activity = Activity(
             date = record.get('date'),
@@ -10,9 +11,11 @@ def activity(df: pandas.DataFrame):
             run_distance = record.get('runDistance'),
             calories = record.get('calories')
         )
-        activity.save()
+        records.append(activity)
+    Activity.objects.insert(records)
 
 def sleep(df: pandas.DataFrame):
+    records = []
     for record in df.to_dict('records'):
         sleep = Sleep(
             date = record.get('date'),
@@ -22,18 +25,22 @@ def sleep(df: pandas.DataFrame):
             sleep_start_time = record.get('start'),
             sleep_stop_time = record.get('stop')
         )
-        sleep.save()
+        records.append(sleep)
+    Sleep.objects.insert(records)
 
 def heartrate_auto(df: pandas.DataFrame):
+    records = []
     for record in df.to_dict('records'):
         heartrate_auto = HeartrateAuto(
             date = record.get('date'),
             time = record.get('time'),
             heart_rate = record.get('heartRate')
         )
-        heartrate_auto.save()
+        records.append(heartrate_auto)
+    HeartrateAuto.objects.insert(records)
 
 def sport(df: pandas.DataFrame):
+    records = []
     for record in df.to_dict('records'):
         sport = Sport(
             sport_type = record.get('type'),
@@ -45,9 +52,11 @@ def sport(df: pandas.DataFrame):
             avg_pace = record.get('avgPace'), 
             calories = record.get('calories')
         )
-        sport.save()
+        records.append(sport)
+    Sport.objects.insert(records)
 
 def activity_stage(df: pandas.DataFrame):
+    records = []
     for record in df.to_dict('records'):
         activity_stage = ActivityStage(
             date = record.get('date'),
@@ -57,4 +66,5 @@ def activity_stage(df: pandas.DataFrame):
             calories = record.get('calories'),
             steps = record.get('steps')
         )
-        activity_stage.save()
+        records.append(activity_stage)
+    ActivityStage.objects.insert(records)
