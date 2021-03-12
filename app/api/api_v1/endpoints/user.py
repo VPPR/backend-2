@@ -19,14 +19,6 @@ def get_users(_: User = Depends(get_current_admin), skip: int = 0, limit: int = 
     return crud.user.get_all(skip, limit)
 
 
-@router.post("/test", response_model=UserSchema)
-def utest(user: UserCreate):
-    print(user.dict())
-    # return user
-    db_user = User(**user.dict()).save()
-    return db_user
-
-
 @router.get("/self", response_model=Response)
 def get_self(user: User = Depends(get_current_user)) -> Response:
     return Response(
