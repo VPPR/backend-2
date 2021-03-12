@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, validator
-from bson.objectid import ObjectId
 
 # Shared properties
 class UserBase(BaseModel):
@@ -9,7 +8,6 @@ class UserBase(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     is_admin: Optional[bool] = None
-    is_active: Optional[bool] = None
 
     @validator("phone")
     def phone_validator(cls, v: Optional[str]) -> Optional[str]:
@@ -31,8 +29,14 @@ class UserCreate(UserBase):
 
 
 # Properties to receive via API on update
-class UserUpdate(UserBase):
+
+
+class UserUpdateSelf(UserBase):
     password: Optional[str]
+
+
+class UserUpdate(UserUpdateSelf):
+    is_active: Optional[bool]
 
 
 class User(UserBase):
