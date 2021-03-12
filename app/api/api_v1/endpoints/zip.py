@@ -25,7 +25,8 @@ async def upload_zip(
         if filename:
             try:
                 fileobj = zipfile.read(
-                    name=folder + "/" + filename, pwd=bytes(zip_password, encoding="UTF-8")
+                    name=folder + "/" + filename,
+                    pwd=bytes(zip_password, encoding="UTF-8"),
                 )
             except RuntimeError as e:
                 # why 422 status code? read following
@@ -37,12 +38,12 @@ async def upload_zip(
                 )
             df = pandas.read_csv(io.BytesIO(fileobj))
             if folder == "ACTIVITY":
-                ziputils.activity(df)
+                ziputils.activity(df, user)
             elif folder == "SLEEP":
-                ziputils.sleep(df)
+                ziputils.sleep(df, user)
             elif folder == "HEARTRATE_AUTO":
-                ziputils.heartrate_auto(df)
+                ziputils.heartrate_auto(df, user)
             elif folder == "SPORT":
-                ziputils.sport(df)
+                ziputils.sport(df, user)
             elif folder == "ACTIVITY_STAGE":
-                ziputils.activity_stage(df)
+                ziputils.activity_stage(df, user)

@@ -1,5 +1,13 @@
 from mongoengine import Document
-from mongoengine.fields import FloatField, IntField, LongField, StringField
+from mongoengine.fields import (
+    FloatField,
+    IntField,
+    LongField,
+    StringField,
+    ReferenceField,
+)
+from app.models.user import User
+
 
 class Activity(Document):
     date = StringField(required=True)
@@ -8,6 +16,9 @@ class Activity(Document):
     run_distance = IntField(required=True)
     calories = IntField(required=True)
 
+    user = ReferenceField(User)
+
+
 class Sleep(Document):
     date = StringField(required=True)
     deep_sleep_time = IntField(required=True)
@@ -15,6 +26,9 @@ class Sleep(Document):
     wake_time = IntField(required=True)
     sleep_start_time = LongField(required=True)
     sleep_stop_time = LongField(required=True)
+
+    user = ReferenceField(User)
+
 
 class Sport(Document):
     sport_type = IntField(required=True)
@@ -26,6 +40,9 @@ class Sport(Document):
     avg_pace = FloatField(required=True)
     calories = IntField(required=True)
 
+    user = ReferenceField(User)
+
+
 class ActivityStage(Document):
     date = StringField(required=True)
     activity_start_time = StringField(required=True)
@@ -34,7 +51,12 @@ class ActivityStage(Document):
     calories = IntField(required=True)
     steps = IntField(required=True)
 
+    user = ReferenceField(User)
+
+
 class HeartrateAuto(Document):
     date = StringField(required=True)
     time = StringField(required=True)
     heart_rate = IntField(required=True)
+
+    user = ReferenceField(User)

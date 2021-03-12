@@ -12,15 +12,15 @@ from datetime import datetime, timedelta
 from pydantic import ValidationError
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f'{settings.API_V1_STR}/login/access-token'
+    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
 
-pwd_context = CryptContext(schemes=['bcrypt'])
+pwd_context = CryptContext(schemes=["bcrypt"])
 
 
 def create_access_token(subject: Union[str, Any]):
     expire = datetime.utcnow() + timedelta(seconds=settings.TOKEN_EXPIRY)
-    to_encode = {'exp': expire, 'subject': str(subject)}
+    to_encode = {"exp": expire, "subject": str(subject)}
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
@@ -45,9 +45,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         print(e)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail='Could not validate credentials',
+            detail="Could not validate credentials",
         )
     user = User.objects(id=token_data.subject).first()
     if not user:
-        raise HTTPException(status_code=404, detail='User not found')
+        raise HTTPException(status_code=404, detail="User not found")
     return user

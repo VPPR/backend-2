@@ -13,22 +13,22 @@ from app.schema.user import UserCreate, User as UserSchema
 router = APIRouter()
 
 
-@router.post('/login/access-token', response_model=Token)
+@router.post("/login/access-token", response_model=Token)
 def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
     user = authenticate(email=form_data.username, password=form_data.password)
     if not user:
-        raise HTTPException(status_code=401, detail='Incorrect email or password')
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
     access_token_expires = timedelta(seconds=settings.TOKEN_EXPIRY)
     return {
-        'access_token': create_access_token(user.id),
-        'token_type': 'bearer',
+        "access_token": create_access_token(user.id),
+        "token_type": "bearer",
     }
 
 
-@router.post('/signup', response_model=UserSchema)
+@router.post("/signup", response_model=UserSchema)
 def user_signup(user: UserCreate = Body(...)) -> UserSchema:
     try:
         db_user = signup(user)
@@ -36,10 +36,10 @@ def user_signup(user: UserCreate = Body(...)) -> UserSchema:
     except NotUniqueError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail='User with this email already exists'
+            detail="User with this email already exists",
         )
 
 
-@router.get('/test', response_model=UserSchema)
+@router.get("/test", response_model=UserSchema)
 def test(user=Depends(get_current_user)):
     return user
