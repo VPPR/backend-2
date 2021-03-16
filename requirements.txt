@@ -31,3 +31,4 @@ six==1.15.0
 starlette==0.13.6
 toml==0.10.2
 uvicorn==0.13.3
+black==20.8b1

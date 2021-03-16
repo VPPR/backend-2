@@ -6,7 +6,7 @@ function run_cmd() {
 
 eval $(ssh-agent)
 ssh-add - <<< $SSH_KEY
-run_cmd "git -C backend fetch origin master"
-run_cmd "git -C backend reset --hard origin/master"
+run_cmd "git -C backend fetch origin main"
+run_cmd "git -C backend reset --hard origin/main"
 run_cmd "sudo systemctl restart backend"
 eval $(ssh-agent -k)
