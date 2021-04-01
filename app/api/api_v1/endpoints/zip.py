@@ -1,13 +1,13 @@
-from os import read
-from fastapi import APIRouter, File, UploadFile, Body, Depends, HTTPException, status
-from pydantic import utils
-from app.core.security import get_current_user
 import io
+from zipfile import ZipFile
+
 import pandas
+import pyzipper
+from fastapi import (APIRouter, Body, Depends, File, HTTPException, UploadFile,
+                     status)
 
 from app.api.api_v1.endpoints.utils import ziputils
-from zipfile import ZipFile
-import pyzipper
+from app.core.security import get_current_user
 
 router = APIRouter()
 

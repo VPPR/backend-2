@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, EmailField, BooleanField
+from mongoengine import BooleanField, Document, EmailField, StringField
 from mongoengine.errors import ValidationError
 
 

@@ -1,5 +1,5 @@
-from pydantic import BaseSettings
 from decouple import config
+from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):

@@ -1,7 +1,9 @@
 import pandas
-from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
-from app.models.user import User
 from pymongo.errors import BulkWriteError
+
+from app.models.user import User
+from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
+
 
 def activity(df: pandas.DataFrame, user: User):
     records = []
@@ -17,11 +19,14 @@ def activity(df: pandas.DataFrame, user: User):
         records.append(activity.to_mongo())
     try:
         Activity._get_collection().insert_many(records, ordered=False)
-    except BulkWriteError as bwe:
-        print("Batch Inserted with some errors. May be some duplicates were found and are skipped.")
+    except BulkWriteError:
+        print(
+            "Batch Inserted with some errors. May be some duplicates were found and are skipped."
+        )
 
     except Exception as e:
-        print( { 'error': str(e) })
+        print({"error": str(e)})
+
 
 def sleep(df: pandas.DataFrame, user: User):
     records = []
@@ -38,11 +43,14 @@ def sleep(df: pandas.DataFrame, user: User):
         records.append(sleep.to_mongo())
     try:
         Sleep._get_collection().insert_many(records, ordered=False)
-    except BulkWriteError as bwe:
-        print("Batch Inserted with some errors. May be some duplicates were found and are skipped.")
+    except BulkWriteError:
+        print(
+            "Batch Inserted with some errors. May be some duplicates were found and are skipped."
+        )
 
     except Exception as e:
-        print( { 'error': str(e) })
+        print({"error": str(e)})
+
 
 def heartrate_auto(df: pandas.DataFrame, user: User):
     records = []
@@ -56,11 +64,14 @@ def heartrate_auto(df: pandas.DataFrame, user: User):
         records.append(heartrate_auto.to_mongo())
     try:
         HeartrateAuto._get_collection().insert_many(records, ordered=False)
-    except BulkWriteError as bwe:
-        print("Batch Inserted with some errors. May be some duplicates were found and are skipped.")
+    except BulkWriteError:
+        print(
+            "Batch Inserted with some errors. May be some duplicates were found and are skipped."
+        )
 
     except Exception as e:
-        print( { 'error': str(e) })
+        print({"error": str(e)})
+
 
 def sport(df: pandas.DataFrame, user: User):
     records = []
@@ -79,11 +90,13 @@ def sport(df: pandas.DataFrame, user: User):
         records.append(sport.to_mongo())
     try:
         Sport._get_collection().insert_many(records, ordered=False)
-    except BulkWriteError as bwe:
-        print("Batch Inserted with some errors. May be some duplicates were found and are skipped.")
+    except BulkWriteError:
+        print(
+            "Batch Inserted with some errors. May be some duplicates were found and are skipped."
+        )
 
     except Exception as e:
-        print( { 'error': str(e) })
+        print({"error": str(e)})
 
 
 def activity_stage(df: pandas.DataFrame, user: User):
@@ -101,8 +114,10 @@ def activity_stage(df: pandas.DataFrame, user: User):
         records.append(activity_stage.to_mongo())
     try:
         ActivityStage._get_collection().insert_many(records, ordered=False)
-    except BulkWriteError as bwe:
-        print("Batch Inserted with some errors. May be some duplicates were found and are skipped.")
+    except BulkWriteError:
+        print(
+            "Batch Inserted with some errors. May be some duplicates were found and are skipped."
+        )
 
     except Exception as e:
-        print( { 'error': str(e) })
+        print({"error": str(e)})
