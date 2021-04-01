@@ -1,4 +1,5 @@
 from mongoengine import Document
+from mongoengine import fields
 from mongoengine.fields import (
     FloatField,
     IntField,
@@ -18,6 +19,14 @@ class Activity(Document):
 
     user = ReferenceField(User)
 
+    meta = {
+        "index_background": True,
+        "indexes": [
+            "user",
+            {"fields": ("user", "date"), "unique": True, "name": "user_date"},
+        ],
+    }
+
 
 class Sleep(Document):
     date = StringField(required=True)
@@ -28,6 +37,14 @@ class Sleep(Document):
     sleep_stop_time = LongField(required=True)
 
     user = ReferenceField(User)
+
+    meta = {
+        "index_background": True,
+        "indexes": [
+            "user",
+            {"fields": ("user", "date"), "unique": True, "name": "user_date"},
+        ],
+    }
 
 
 class Sport(Document):
@@ -42,6 +59,18 @@ class Sport(Document):
 
     user = ReferenceField(User)
 
+    meta = {
+        "index_background": True,
+        "indexes": [
+            "user",
+            {
+                "fields": ("user", "start_time"),
+                "unique": True,
+                "name": "user_start_time",
+            },
+        ],
+    }
+
 
 class ActivityStage(Document):
     date = StringField(required=True)
@@ -53,6 +82,18 @@ class ActivityStage(Document):
 
     user = ReferenceField(User)
 
+    meta = {
+        "index_background": True,
+        "indexes": [
+            "user",
+            {
+                "fields": ("user", "date", "activity_start_time"),
+                "unique": True,
+                "name": "user_date_activity_start_time",
+            },
+        ],
+    }
+
 
 class HeartrateAuto(Document):
     date = StringField(required=True)
@@ -60,3 +101,15 @@ class HeartrateAuto(Document):
     heart_rate = IntField(required=True)
 
     user = ReferenceField(User)
+
+    meta = {
+        "index_background": True,
+        "indexes": [
+            "user",
+            {
+                "fields": ("user", "date", "time"),
+                "unique": True,
+                "name": "user_date_time",
+            },
+        ],
+    }
