@@ -35,7 +35,7 @@ def user_signup(user: UserCreate = Body(...)) -> User:
     try:
         db_user = crud.user.create(user)
         return db_user
-    except NotUniqueError as e:
+    except NotUniqueError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already exists",
