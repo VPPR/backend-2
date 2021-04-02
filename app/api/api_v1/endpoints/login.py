@@ -1,16 +1,17 @@
-from app.models.user import User
-from mongoengine.errors import NotUniqueError
-from app.core.config import settings
-from datetime import timedelta, datetime
-from typing import Any
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from app.schema.token import Token
+from mongoengine.errors import NotUniqueError
+
 from app import crud
-from app.core.security import create_access_token
 from app.api.deps import get_current_user
-from app.schema.user import UserCreate, User as UserSchema
+from app.core.config import settings
+from app.core.security import create_access_token
+from app.models.user import User
+from app.schema.token import Token
+from app.schema.user import User as UserSchema
+from app.schema.user import UserCreate
 
 router = APIRouter()
 

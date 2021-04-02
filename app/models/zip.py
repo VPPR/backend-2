@@ -1,6 +1,11 @@
 from mongoengine import Document
-from mongoengine.fields import (FloatField, IntField, LongField,
-                                ReferenceField, StringField)
+from mongoengine.fields import (
+    FloatField,
+    IntField,
+    LongField,
+    ReferenceField,
+    StringField,
+)
 
 from app.models.user import User
 

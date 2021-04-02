@@ -1,13 +1,15 @@
 from typing import List
+
 from bson.objectid import ObjectId
-from fastapi.params import Body, Path
-from app.schema.response import Response
-from fastapi.exceptions import HTTPException
-from app.api.deps import get_current_admin
-from fastapi.param_functions import Depends
-from app.models.user import User
-from app.models.admin_approval import Approval
 from fastapi import APIRouter, status
+from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Depends
+from fastapi.params import Path
+
+from app.api.deps import get_current_admin
+from app.models.admin_approval import Approval
+from app.models.user import User
+from app.schema.response import Response
 from app.schema.user import User as UserSchema
 
 router = APIRouter()

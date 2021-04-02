@@ -2,6 +2,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, validator
 
+
 # Shared properties
 class UserBase(BaseModel):
     fullname: Optional[str] = None

@@ -1,15 +1,17 @@
-from app import crud
 from typing import List
+
 from bson.objectid import ObjectId
-from fastapi.params import Body, Path
-from pydantic.networks import EmailStr
-from app.schema.response import Response
-from fastapi.exceptions import HTTPException
-from app.api.deps import get_current_user, get_current_admin
-from fastapi.param_functions import Depends
-from app.models.user import User
 from fastapi import APIRouter, status
-from app.schema.user import User as UserSchema, UserCreate, UserUpdate, UserUpdateSelf
+from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Depends
+from fastapi.params import Body, Path
+
+from app import crud
+from app.api.deps import get_current_admin, get_current_user
+from app.models.user import User
+from app.schema.response import Response
+from app.schema.user import User as UserSchema
+from app.schema.user import UserUpdate, UserUpdateSelf
 
 router = APIRouter()
 

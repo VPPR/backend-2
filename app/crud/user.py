@@ -1,15 +1,14 @@
-from app.crud.base import CRUDBase
 from typing import Optional
 
+from fastapi import status
 from fastapi.exceptions import HTTPException
 from mongoengine.errors import ValidationError
-from fastapi import status
-from app.models.user import User
-from app.models.admin_approval import Approval
-from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
+
 from app.core.security import get_password_hash, verify_password
+from app.crud.base import CRUDBase
+from app.models.admin_approval import Approval
 from app.models.user import User
-from app.schema.user import UserCreate
+from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

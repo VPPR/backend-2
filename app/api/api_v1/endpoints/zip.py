@@ -3,11 +3,10 @@ from zipfile import ZipFile
 
 import pandas
 import pyzipper
-from fastapi import (APIRouter, Body, Depends, File, HTTPException, UploadFile,
-                     status)
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status
 
 from app.api.api_v1.endpoints.utils import ziputils
-from app.core.security import get_current_user
+from app.api.deps import get_current_user
 
 router = APIRouter()
 

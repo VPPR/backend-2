@@ -1,14 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Union
+
 from fastapi.security import OAuth2PasswordBearer
-from app.core.config import settings
 from jose import jwt
 from passlib.context import CryptContext
-from datetime import datetime
 
 from app.core.config import settings
-from app.models.user import User
-from app.schema.token import TokenPayload
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
