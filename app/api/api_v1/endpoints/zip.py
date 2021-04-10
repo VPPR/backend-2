@@ -11,7 +11,7 @@ from app.api.deps import get_current_user
 router = APIRouter()
 
 
-@router.post("/miband/zip")
+@router.post("/zip")
 async def upload_zip(
     file: UploadFile = File(...),
     zip_password: str = Body(...),
@@ -48,3 +48,9 @@ async def upload_zip(
                     ziputils.sport(df, user)
                 elif folder == "ACTIVITY_STAGE":
                     ziputils.activity_stage(df, user)
+
+@router.post("/activity",status_code=200)
+async def read_activity_csv(file: UploadFile = File(...), user = Depends(get_current_user)):
+    file_data =await file.read()
+    df = pandas.read_csv(io.BytesIO(file_data))
+    print(df.head())

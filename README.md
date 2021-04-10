@@ -38,7 +38,7 @@ Deployment
             <b>Deployed Site</b> 
         </td>
         <td>
-            <a href="https://vppr-test.herokuapp.com/">https://vppr-test.herokuapp.com/</a>
+            <a href="https://backend.vppr.tech/">https://backend.vppr.tech/</a>
         </td>
     </tr>
     <tr>
@@ -46,7 +46,7 @@ Deployment
             <b>Swagger UI</b> 
         </td>
         <td>
-            <a href="https://vppr-test.herokuapp.com/docs">https://vppr-test.herokuapp.com/docs</a>
+            <a href="https://backend.vppr.tech/docs">https://backend.vppr.tech/docs</a>
         </td>
     </tr>
     <tr>
@@ -54,7 +54,7 @@ Deployment
             <b>Redoc</b> 
         </td>
         <td>
-            <a  href="https://vppr-test.herokuapp.com/redoc">https://vppr-test.herokuapp.com/redoc</a>
+            <a  href="https://backend.vppr.tech/redoc">https://backend.vppr.tech/redoc</a>
         </td>
     </tr>
 </table>

@@ -50,7 +50,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         return db_user
 
-    def update(self, model: User, obj: UserUpdateSelf):
+    def update_self(self, model: User, obj: UserUpdateSelf):
         if obj.password is not None:
             obj.password = get_password_hash(obj.password)
         return super().update(model, obj)
