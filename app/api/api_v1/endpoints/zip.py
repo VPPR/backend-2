@@ -50,28 +50,32 @@ async def upload_zip(
                 elif folder == "ACTIVITY_STAGE":
                     ziputils.activity_stage(df, user)
 
-@router.post("/activity",status_code=200)
-async def read_activity_csv(file: UploadFile = File(...), user = Depends(get_current_user)):
-    file_data =await file.read()
+
+@router.post("/activity", status_code=200)
+async def read_activity_csv(
+    file: UploadFile = File(...), user=Depends(get_current_user)
+):
+    file_data = await file.read()
     df = pandas.read_csv(io.BytesIO(file_data))
     print(df.head())
 
-@router.post("/upload",status_code=200)
+
+@router.post("/upload", status_code=200)
 async def upload_file(
-    user = Depends(get_current_user),
-    activity: UploadFile = File(None,alias="ACTIVITY"),
-    heartRateAuto: UploadFile = File(None,alias="HEARTRATE_AUTO"),
-    sleep: UploadFile = File(None,alias="SLEEP"),
-    actvityStage: UploadFile = File(None,alias="ACTIVITY_STAGE"),
-    sport: UploadFile = File(None,alias="SPORT")
+    user=Depends(get_current_user),
+    activity: UploadFile = File(None, alias="ACTIVITY"),
+    heartRateAuto: UploadFile = File(None, alias="HEARTRATE_AUTO"),
+    sleep: UploadFile = File(None, alias="SLEEP"),
+    actvityStage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
+    sport: UploadFile = File(None, alias="SPORT"),
 ):
     if activity is not None:
-        create_task(ziputils.parse_data(activity,"ACTIVITY",user))
+        create_task(ziputils.parse_data(activity, "ACTIVITY", user))
     if heartRateAuto is not None:
-        create_task(ziputils.parse_data(heartRateAuto,"HEARTRATE_AUTO",user))
+        create_task(ziputils.parse_data(heartRateAuto, "HEARTRATE_AUTO", user))
     if sleep is not None:
-        create_task(ziputils.parse_data(sleep,"SLEEP",user))
+        create_task(ziputils.parse_data(sleep, "SLEEP", user))
     if actvityStage is not None:
-        create_task(ziputils.parse_data(actvityStage,"ACTIVITY_STAGE",user))
+        create_task(ziputils.parse_data(actvityStage, "ACTIVITY_STAGE", user))
     if sport is not None:
-        create_task(ziputils.parse_data(sport,"SPORT",user))
+        create_task(ziputils.parse_data(sport, "SPORT", user))

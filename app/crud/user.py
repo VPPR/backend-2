@@ -42,7 +42,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         except ValidationError as e:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unable to process"
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Unable to process",
             )
 
         return db_user

@@ -7,7 +7,7 @@ from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
 from app.schema.user import User as UserSchema
 
 
-async def parse_data(file: UploadFile,name: str, user=UserSchema):
+async def parse_data(file: UploadFile, name: str, user=UserSchema):
     data = await file.read()
     df = pandas.read_csv(io.BytesIO(data))
     if name == "ACTIVITY":
