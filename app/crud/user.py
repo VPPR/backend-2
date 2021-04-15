@@ -13,7 +13,6 @@ from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def authenticate(self, email: str, password: str) -> Optional[User]:
-        print(email)
         try:
             user = User.objects(email=email).first()
             if user:
@@ -24,7 +23,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 return user
             raise HTTPException(status_code=404, detail="User doesnt exist")
         except Exception as e:
-            print(e)
             raise HTTPException(status_code=e.status_code, detail=e.detail)
 
     def create(self, user: UserCreate) -> User:
@@ -43,9 +41,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 Approval(user=db_user).save()
 
         except ValidationError as e:
-            print(e.__dict__)
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Fuck you"
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unable to process"
             )
 
         return db_user
