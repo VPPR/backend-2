@@ -27,7 +27,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     return Token(
         access_token=create_access_token(user.id, access_token_expires),
         token_type="Bearer",
-        expiry=access_token_expires,
+        expiry=access_token_expires.strftime("%Y-%m-%d %H:%M:%SZ"),
     )
 
 
