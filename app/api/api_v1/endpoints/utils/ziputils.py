@@ -1,28 +1,11 @@
-import io
 import pandas
-from fastapi.datastructures import UploadFile
 from pymongo.errors import BulkWriteError
+
 from app.models.user import User
 from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
-from app.schema.user import User as UserSchema
 
 
-async def parse_data(file: UploadFile, name: str, user=UserSchema):
-    data = await file.read()
-    df = pandas.read_csv(io.BytesIO(data))
-    if name == "ACTIVITY":
-        activity(df, user)
-    elif name == "SLEEP":
-        sleep(df, user)
-    elif name == "HEARTRATE_AUTO":
-        heartrate_auto(df, user)
-    elif name == "SPORT":
-        sport(df, user)
-    elif name == "ACTIVITY_STAGE":
-        activity_stage(df, user)
-
-
-def activity(df: pandas.DataFrame, user: User):
+async def activity(df: pandas.DataFrame, user: User):
     records = []
     for record in df.to_dict("records"):
         activity = Activity(
@@ -45,7 +28,7 @@ def activity(df: pandas.DataFrame, user: User):
         print({"error": str(e)})
 
 
-def sleep(df: pandas.DataFrame, user: User):
+async def sleep(df: pandas.DataFrame, user: User):
     records = []
     for record in df.to_dict("records"):
         sleep = Sleep(
@@ -69,7 +52,7 @@ def sleep(df: pandas.DataFrame, user: User):
         print({"error": str(e)})
 
 
-def heartrate_auto(df: pandas.DataFrame, user: User):
+async def heartrate_auto(df: pandas.DataFrame, user: User):
     records = []
     for record in df.to_dict("records"):
         heartrate_auto = HeartrateAuto(
@@ -90,7 +73,7 @@ def heartrate_auto(df: pandas.DataFrame, user: User):
         print({"error": str(e)})
 
 
-def sport(df: pandas.DataFrame, user: User):
+async def sport(df: pandas.DataFrame, user: User):
     records = []
     for record in df.to_dict("records"):
         sport = Sport(
@@ -116,7 +99,7 @@ def sport(df: pandas.DataFrame, user: User):
         print({"error": str(e)})
 
 
-def activity_stage(df: pandas.DataFrame, user: User):
+async def activity_stage(df: pandas.DataFrame, user: User):
     records = []
     for record in df.to_dict("records"):
         activity_stage = ActivityStage(
