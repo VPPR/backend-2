@@ -1,8 +1,7 @@
 import io
-from typing import List
+from asyncio import create_task
 from zipfile import ZipFile
 
-from asyncio import create_task
 import pandas
 import pyzipper
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status
@@ -30,7 +29,7 @@ async def upload_zip(
             if filename:
                 try:
                     fileobj = f.read(folder + "/" + filename)
-                except RuntimeError as e:
+                except RuntimeError:
                     # why 422 status code? read following
                     # https://stackoverflow.com/questions/7939137/right-http-status-code-to-wrong-input
                     # https://www.bennadel.com/blog/2434-http-status-codes-for-invalid-data-400-vs-422.htm
@@ -66,16 +65,19 @@ async def upload_file(
     activity: UploadFile = File(None, alias="ACTIVITY"),
     heartRateAuto: UploadFile = File(None, alias="HEARTRATE_AUTO"),
     sleep: UploadFile = File(None, alias="SLEEP"),
-    actvityStage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
+    activityStage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
     sport: UploadFile = File(None, alias="SPORT"),
 ):
-    if activity is not None:
-        create_task(ziputils.parse_data(activity, "ACTIVITY", user))
-    if heartRateAuto is not None:
-        create_task(ziputils.parse_data(heartRateAuto, "HEARTRATE_AUTO", user))
-    if sleep is not None:
-        create_task(ziputils.parse_data(sleep, "SLEEP", user))
-    if actvityStage is not None:
-        create_task(ziputils.parse_data(actvityStage, "ACTIVITY_STAGE", user))
-    if sport is not None:
-        create_task(ziputils.parse_data(sport, "SPORT", user))
+    async def get_df(file: UploadFile):
+        return pandas.read_csv(io.BytesIO(await file.read()))
+
+    if activity:
+        create_task(ziputils.activity(await get_df(activity), user))
+    if heartRateAuto:
+        create_task(ziputils.heartrate_auto(await get_df(heartRateAuto), user))
+    if sleep:
+        create_task(ziputils.sleep(await get_df(sleep), user))
+    if activityStage:
+        create_task(ziputils.activity_stage(await get_df(activityStage), user))
+    if sport:
+        create_task(ziputils.sport(await get_df(sport), user))
