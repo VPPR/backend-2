@@ -46,7 +46,7 @@ def update_self(
     #     update.phone = phone
     # if password is not None:
     #     update.password = get_password_hash(password)
-    crud.user.update(user, update)
+    crud.user.update_self(user, update)
     return user
 
 

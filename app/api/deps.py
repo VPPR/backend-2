@@ -16,7 +16,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         )
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError) as e:
-        print(e)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",

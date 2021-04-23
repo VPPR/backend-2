@@ -1,6 +1,8 @@
 import io
+from typing import List
 from zipfile import ZipFile
 
+from asyncio import create_task
 import pandas
 import pyzipper
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status
@@ -11,7 +13,7 @@ from app.api.deps import get_current_user
 router = APIRouter()
 
 
-@router.post("/miband/zip")
+@router.post("/zip")
 async def upload_zip(
     file: UploadFile = File(...),
     zip_password: str = Body(...),
@@ -32,7 +34,6 @@ async def upload_zip(
                     # why 422 status code? read following
                     # https://stackoverflow.com/questions/7939137/right-http-status-code-to-wrong-input
                     # https://www.bennadel.com/blog/2434-http-status-codes-for-invalid-data-400-vs-422.htm
-                    print(e.with_traceback())
                     raise HTTPException(
                         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                         detail="wrong password for zip file",
@@ -48,3 +49,33 @@ async def upload_zip(
                     ziputils.sport(df, user)
                 elif folder == "ACTIVITY_STAGE":
                     ziputils.activity_stage(df, user)
+
+
+@router.post("/activity", status_code=200)
+async def read_activity_csv(
+    file: UploadFile = File(...), user=Depends(get_current_user)
+):
+    file_data = await file.read()
+    df = pandas.read_csv(io.BytesIO(file_data))
+    print(df.head())
+
+
+@router.post("/upload", status_code=200)
+async def upload_file(
+    user=Depends(get_current_user),
+    activity: UploadFile = File(None, alias="ACTIVITY"),
+    heartRateAuto: UploadFile = File(None, alias="HEARTRATE_AUTO"),
+    sleep: UploadFile = File(None, alias="SLEEP"),
+    actvityStage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
+    sport: UploadFile = File(None, alias="SPORT"),
+):
+    if activity is not None:
+        create_task(ziputils.parse_data(activity, "ACTIVITY", user))
+    if heartRateAuto is not None:
+        create_task(ziputils.parse_data(heartRateAuto, "HEARTRATE_AUTO", user))
+    if sleep is not None:
+        create_task(ziputils.parse_data(sleep, "SLEEP", user))
+    if actvityStage is not None:
+        create_task(ziputils.parse_data(actvityStage, "ACTIVITY_STAGE", user))
+    if sport is not None:
+        create_task(ziputils.parse_data(sport, "SPORT", user))
