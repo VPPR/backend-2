@@ -63,9 +63,9 @@ async def read_activity_csv(
 async def upload_file(
     user=Depends(get_current_user),
     activity: UploadFile = File(None, alias="ACTIVITY"),
-    heartRateAuto: UploadFile = File(None, alias="HEARTRATE_AUTO"),
+    heartrate_auto: UploadFile = File(None, alias="HEARTRATE_AUTO"),
     sleep: UploadFile = File(None, alias="SLEEP"),
-    activityStage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
+    activity_stage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
     sport: UploadFile = File(None, alias="SPORT"),
 ):
     async def get_df(file: UploadFile):
@@ -73,11 +73,11 @@ async def upload_file(
 
     if activity:
         create_task(ziputils.activity(await get_df(activity), user))
-    if heartRateAuto:
-        create_task(ziputils.heartrate_auto(await get_df(heartRateAuto), user))
+    if heartrate_auto:
+        create_task(ziputils.heartrate_auto(await get_df(heartrate_auto), user))
     if sleep:
         create_task(ziputils.sleep(await get_df(sleep), user))
-    if activityStage:
-        create_task(ziputils.activity_stage(await get_df(activityStage), user))
+    if activity_stage:
+        create_task(ziputils.activity_stage(await get_df(activity_stage), user))
     if sport:
         create_task(ziputils.sport(await get_df(sport), user))
