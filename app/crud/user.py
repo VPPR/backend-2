@@ -40,7 +40,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             if user.is_admin:
                 Approval(user=db_user).save()
 
-        except ValidationError as e:
+        except ValidationError:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Unable to process",

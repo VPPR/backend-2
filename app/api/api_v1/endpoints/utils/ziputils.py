@@ -1,11 +1,8 @@
-import io
 import pandas
-from fastapi.datastructures import UploadFile
 from pymongo.errors import BulkWriteError
+
 from app.models.user import User
 from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
-from app.schema.user import User as UserSchema
-
 
 
 async def activity(df: pandas.DataFrame, user: User):
