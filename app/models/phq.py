@@ -6,7 +6,7 @@ from app.models.user import User
 
 class Phq(Document):
     user = ReferenceField(User)
-    date = DateTimeField(required=True)
+    datetime = DateTimeField(required=True)
 
     q1 = IntField(required=False)
     q2 = IntField(required=False)

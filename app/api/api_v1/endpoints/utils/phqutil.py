@@ -1,6 +1,8 @@
 import random
+from datetime import date, datetime
 
 from app.models.user import User
+from app.models.phq import Phq
 
 QV1 = [
     "I have little interest or pleasure in doing things",
@@ -35,11 +37,21 @@ def all_questions() -> list:
             question = QV1[i]
         else:
             question = QV2[i]
-        questions.append({"qno": i, "question": question, "version": version})
+        questions.append({"qno": i+1, "question": question, "version": version})
     return questions
 
-
 def three_questions(user: User) -> list:
+    # get records for current user that have datetime greater than or equal to todays date at midnight
+    # sort the records in desc order of datetime
+    todays_records = Phq.objects(user=user, datetime__gte=datetime.combine(datetime.utcnow().date(), datetime.min.time())).order_by("-datetime")
+    all_ques = all_questions()
+    # if no records for that day, send 3 random questions
+    if len(todays_records) == 0:
+        return random.choices(all_ques, k=3)
+    if len(todays_records) < 3:
+        # if no records past 4 hour, select 3 random questions
+        if (datetime.utcnow() - todays_records[0].datetime).total_seconds()/60 > 240:
+            return random.choices(all_ques, k=3)
     return []
 
 

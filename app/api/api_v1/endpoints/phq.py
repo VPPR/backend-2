@@ -11,13 +11,13 @@ router = APIRouter()
 
 @router.get("/phq9")
 def phq9_questions(user=Depends(get_current_user)):
-    records = Phq.objects(id=user)
+    records = Phq.objects(user=user).all()
     # if no record exists, send all 9 questions
     # otherwise send 3 questions
     if not records:
-        all_questions()
+        return all_questions()
     else:
-        three_questions(user)
+        return three_questions(user)
 
 
 @router.post("/phq9")
