@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends
-from fastapi.param_functions import Body, 
+from fastapi.param_functions import Body
 
-from app.models.phq import Phq
 from app.api.deps import get_current_user
+from app.models.phq import Phq
+
 from .utils.phqutil import add_answers_to_db, all_questions, three_questions
 
 router = APIRouter()
+
 
 @router.get("/phq9")
 def phq9_questions(user=Depends(get_current_user)):
@@ -16,6 +18,7 @@ def phq9_questions(user=Depends(get_current_user)):
         all_questions()
     else:
         three_questions(user)
+
 
 @router.post("/phq9")
 def phq9_score(user=Depends(get_current_user), body: dict = Body(...)):

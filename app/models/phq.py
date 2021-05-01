@@ -1,5 +1,5 @@
 from mongoengine import Document
-from mongoengine.fields import DateTimeField, ReferenceField, IntField
+from mongoengine.fields import DateTimeField, IntField, ReferenceField
 
 from app.models.user import User
 
@@ -7,7 +7,7 @@ from app.models.user import User
 class Phq(Document):
     user = ReferenceField(User)
     date = DateTimeField(required=True)
-    
+
     q1 = IntField(required=False)
     q2 = IntField(required=False)
     q3 = IntField(required=False)
@@ -17,4 +17,3 @@ class Phq(Document):
     q7 = IntField(required=False)
     q8 = IntField(required=False)
     q9 = IntField(required=False)
-
