@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -23,11 +23,13 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     """
 
     user = crud.user.authenticate(form_data.username, form_data.password)
-    access_token_expires = datetime.utcnow() + timedelta(seconds=settings.TOKEN_EXPIRY)
+    access_token_expires = datetime.now(tz=timezone.utc) + timedelta(
+        seconds=settings.TOKEN_EXPIRY
+    )
     return Token(
         access_token=create_access_token(user.id, access_token_expires),
         token_type="Bearer",
-        expiry=access_token_expires.strftime("%Y-%m-%d %H:%M:%SZ"),
+        expiry=access_token_expires,
     )
 
 
@@ -41,8 +43,3 @@ def user_signup(user: UserCreate = Body(...)) -> User:
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already exists",
         )
-
-
-@router.get("/test", response_model=UserSchema)
-def test(user=Depends(get_current_user)):
-    return user
