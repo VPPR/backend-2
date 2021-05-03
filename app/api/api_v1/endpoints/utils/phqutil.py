@@ -1,8 +1,11 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
+
+from fastapi.param_functions import Body
 
 from app.models.phq import Phq
 from app.models.user import User
+from app.schema.phq import SingleQuestionResponce
 
 QV1 = [
     "I have little interest or pleasure in doing things",
@@ -59,5 +62,25 @@ def three_questions(user: User) -> list:
     return []
 
 
-def add_answers_to_db():
-    pass
+def add_answers_to_db(user: User, body: Body):
+    def get_score(response: SingleQuestionResponce):
+        if response:
+            if response.version == 1:
+                return response.score
+            elif response.version == 2:
+                return 3 - response.score
+
+    phq = Phq(
+        user=user,
+        datetime=datetime.now(tz=timezone.utc),
+        q1=get_score(body.get(1)),
+        q2=get_score(body.get(2)),
+        q3=get_score(body.get(3)),
+        q4=get_score(body.get(4)),
+        q5=get_score(body.get(5)),
+        q6=get_score(body.get(6)),
+        q7=get_score(body.get(7)),
+        q8=get_score(body.get(8)),
+        q9=get_score(body.get(9)),
+    )
+    phq.save()
