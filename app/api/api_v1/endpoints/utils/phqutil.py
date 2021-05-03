@@ -36,7 +36,7 @@ def all_questions() -> list:
     for i in range(0, 9):
         version = random.choice([1, 2])
         question = ""
-        if version == 0:
+        if version == 1:
             question = QV1[i]
         else:
             question = QV2[i]
