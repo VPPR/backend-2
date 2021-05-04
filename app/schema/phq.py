@@ -1,6 +1,11 @@
 from pydantic import BaseModel, validator
 
 
+class Question(BaseModel):
+    question: str
+    version: int
+
+
 class SingleQuestionResponce(BaseModel):
     score: int
     version: int

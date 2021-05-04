@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timezone
+from typing import Dict, List
 
 from fastapi.param_functions import Body
 
@@ -32,7 +33,7 @@ QV2 = [
 
 
 def all_questions() -> list:
-    questions = []
+    questions = {}
     for i in range(0, 9):
         version = random.choice([1, 2])
         question = ""
@@ -40,7 +41,7 @@ def all_questions() -> list:
             question = QV1[i]
         else:
             question = QV2[i]
-        questions.append({"qno": i + 1, "question": question, "version": version})
+        questions[i + 1] = {"question": question, "version": version}
     return questions
 
 
@@ -54,11 +55,11 @@ def three_questions(user: User) -> list:
     all_ques = all_questions()
     # if no records for that day, send 3 random questions
     if len(todays_records) == 0:
-        return random.choices(all_ques, k=3)
+        return dict(random.choices(list(all_ques.items()), k=3))
     if len(todays_records) < 3:
         # if no records past 4 hour, select 3 random questions
         if (datetime.utcnow() - todays_records[0].datetime).total_seconds() / 60 > 240:
-            return random.choices(all_ques, k=3)
+            return dict(random.choices(list(all_ques.items()), k=3))
     return []
 
 
