@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
 from typing import Dict
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Body
 
 from app.api.deps import get_current_user
 from app.models.phq import AvgAndEstimatedPhqScore, Phq
-from app.schema.phq import Question, SingleQuestionResponce
+from app.schema.phq import PhqScore, Question, SingleQuestionResponce
 
 from .utils.phqutil import (
     add_answers_to_db,
@@ -39,3 +40,14 @@ def phq9_score(
         fix_missing_records(user, record.last_fixed)
     add_answers_to_db(user, body)
     update_avg_and_estm_phq(user, body)
+
+
+@router.get("/score", response_model=PhqScore)
+def get_phq_score(user=Depends(get_current_user)):
+    record = record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    if record:
+        return PhqScore(score=record.estimated_phq, last_answered=record.last_updated)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Haven't answered any questions yet 😞",
+    )
