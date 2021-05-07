@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict
 
-from fastapi import APIRouter, Depends
-from fastapi.param_functions import Body
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from app.api.deps import get_current_user
 from app.models.phq import AvgAndEstimatedPhqScore, Phq
@@ -34,8 +33,13 @@ def phq9_questions(user=Depends(get_current_user)):
 def phq9_score(
     user=Depends(get_current_user), body: Dict[int, SingleQuestionResponce] = Body(...)
 ):
-    record = AvgAndEstimatedPhqScore.objects(user=user).first()
-    if record and record.last_fixed.date() < datetime.now(tz=timezone.utc).date():
-        fix_missing_records(user, record.last_fixed)
-    add_answers_to_db(user, body)
-    update_avg_and_estm_phq(user, body)
+    if body and (len(body.keys()) == 9 or len(body.keys()) == 3):
+        record = AvgAndEstimatedPhqScore.objects(user=user).first()
+        if record and record.last_fixed.date() < datetime.now(tz=timezone.utc).date():
+            fix_missing_records(user, record.last_fixed)
+        add_answers_to_db(user, body)
+        update_avg_and_estm_phq(user, body)
+    else:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unprocessable entity"
+        )
