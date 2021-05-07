@@ -56,11 +56,13 @@ def three_questions(user: User) -> dict:
     all_ques = all_questions()
     # if no records for that day, send 3 random questions
     if len(todays_records) == 0:
-        return dict(random.choices(list(all_ques.items()), k=3))
+        questions_three = random.sample(list(all_ques.items()), k=3)
+        return dict(questions_three)
     if len(todays_records) < 3:
         # if no records past 4 hour, select 3 random questions
         if (datetime.utcnow() - todays_records[0].datetime).total_seconds() / 60 > 240:
-            return dict(random.choices(list(all_ques.items()), k=3))
+            questions_three = random.sample(list(all_ques.items()), k=3)
+            return dict(questions_three)
     return {}
 
 
