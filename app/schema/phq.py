@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, validator
 
 
@@ -42,3 +44,8 @@ class SingleQuestionResponceFloat(BaseModel):
             return version
         else:
             raise ValueError("version can be either 0 or 1")
+
+
+class PhqScore(BaseModel):
+    score: float
+    last_answered: datetime

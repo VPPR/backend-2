@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from app.api.deps import get_current_user
 from app.models.phq import AvgAndEstimatedPhqScore, Phq
-from app.schema.phq import Question, SingleQuestionResponce
+from app.schema.phq import PhqScore, Question, SingleQuestionResponce
 
 from .utils.phqutil import (
     add_answers_to_db,
@@ -43,3 +43,14 @@ def phq9_score(
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unprocessable entity"
         )
+
+
+@router.get("/score", response_model=PhqScore)
+def get_phq_score(user=Depends(get_current_user)):
+    record = record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    if record:
+        return PhqScore(score=record.estimated_phq, last_answered=record.last_updated)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Haven't answered any questions yet 😞",
+    )
