@@ -32,6 +32,8 @@ QV2 = [
 
 
 def all_questions() -> list:
+    # returns the list of all questions and their versions
+    # return : [{1: {"question" : <question string>, "version" : <int 1 or 2>}, 2 : {}, ..., 9{}}]
     questions = {}
     for i in range(0, 9):
         version = random.choice([1, 2])
@@ -44,7 +46,7 @@ def all_questions() -> list:
     return questions
 
 
-def three_questions(user: User) -> list:
+def three_questions(user: User) -> dict:
     # get records for current user that have datetime greater than or equal to todays date at midnight
     # sort the records in desc order of datetime
     todays_records = Phq.objects(
@@ -59,10 +61,12 @@ def three_questions(user: User) -> list:
         # if no records past 4 hour, select 3 random questions
         if (datetime.utcnow() - todays_records[0].datetime).total_seconds() / 60 > 240:
             return dict(random.choices(list(all_ques.items()), k=3))
-    return []
+    return {}
 
 
 def get_score(response: SingleQuestionResponce):
+    # if question version was 1, return score as it is
+    # if question version was 2, return 3-score
     if response:
         if response.version == 1:
             return response.score
@@ -156,6 +160,7 @@ def update_avg_and_estm_phq(user: User, body: dict):
         record.save()
 
     else:
+        # if record doesn't exists, create new record
         record = AvgAndEstimatedPhqScore(
             user=user,
             last_updated=datetime.now(tz=timezone.utc),
@@ -169,6 +174,8 @@ def update_avg_and_estm_phq(user: User, body: dict):
             q7=SingleQuestionAvgScore(average=get_score(body.get(7)), total_records=1),
             q8=SingleQuestionAvgScore(average=get_score(body.get(8)), total_records=1),
             q9=SingleQuestionAvgScore(average=get_score(body.get(9)), total_records=1),
+            # this else case runs only for users first response
+            # therefore estimated phq is just sum of all scores
             estimated_phq=sum(get_score(v) for _, v in body.items()),
         )
         record.save()
@@ -179,10 +186,14 @@ def fix_missing_records(user, last_fix_date: datetime):
     # as well as question not being asked single time for given day
 
     def daterange(start_date, end_date):
+        # returns the range of dates to iterate on
         for n in range(int((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
     for day in daterange(last_fix_date.date(), datetime.now(tz=timezone.utc).date()):
+        # fetch the records of particular day
+        # check for the questiions that haven't answered at all in that days records
+        # and create entry for those missing questions using previous day's average
         records = Phq.objects(
             user=user,
             datetime__gte=datetime.combine(day, datetime.min.time()),
@@ -281,7 +292,6 @@ def fix_missing_records(user, last_fix_date: datetime):
             entry[9] = SingleQuestionResponceFloat(
                 score=estimated_phq_record.q9.average, version=1
             )
-        print("predicted wale ki entry", entry)
         update_avg_and_estm_phq(user, entry)
 
     # update last fixed date
