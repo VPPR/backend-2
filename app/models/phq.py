@@ -33,6 +33,7 @@ class SingleQuestionAvgScore(EmbeddedDocument):
 
 class AvgAndEstimatedPhqScore(Document):
     user = ReferenceField(User)
+    first_recorded = DateTimeField(required=True)
     last_updated = DateTimeField(required=True)
     last_fixed = DateTimeField(required=True)
 

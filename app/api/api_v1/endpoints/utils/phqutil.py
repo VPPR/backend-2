@@ -47,6 +47,10 @@ def all_questions() -> list:
 
 
 def three_questions(user: User) -> dict:
+    # if user has submitted his first record, then he won't get any more questions on same day
+    record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    if record.first_recorded.date() == datetime.now(tz=timezone.utc).date():
+        return {}
     # get records for current user that have datetime greater than or equal to todays date at midnight
     # sort the records in desc order of datetime
     todays_records = Phq.objects(
@@ -165,6 +169,7 @@ def update_avg_and_estm_phq(user: User, body: dict):
         # if record doesn't exists, create new record
         record = AvgAndEstimatedPhqScore(
             user=user,
+            first_recorded=datetime.now(tz=timezone.utc),
             last_updated=datetime.now(tz=timezone.utc),
             last_fixed=datetime.now(tz=timezone.utc),
             q1=SingleQuestionAvgScore(average=get_score(body.get(1)), total_records=1),
