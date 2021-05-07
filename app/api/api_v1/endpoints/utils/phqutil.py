@@ -1,12 +1,11 @@
 import random
-from datetime import datetime, timezone
-from typing import Dict, List
+from datetime import datetime, timedelta, timezone
 
 from fastapi.param_functions import Body
 
-from app.models.phq import Phq
+from app.models.phq import AvgAndEstimatedPhqScore, Phq, SingleQuestionAvgScore
 from app.models.user import User
-from app.schema.phq import SingleQuestionResponce
+from app.schema.phq import SingleQuestionResponce, SingleQuestionResponceFloat
 
 QV1 = [
     "I have little interest or pleasure in doing things",
@@ -63,14 +62,15 @@ def three_questions(user: User) -> list:
     return []
 
 
-def add_answers_to_db(user: User, body: Body):
-    def get_score(response: SingleQuestionResponce):
-        if response:
-            if response.version == 1:
-                return response.score
-            elif response.version == 2:
-                return 3 - response.score
+def get_score(response: SingleQuestionResponce):
+    if response:
+        if response.version == 1:
+            return response.score
+        elif response.version == 2:
+            return 3 - response.score
 
+
+def add_answers_to_db(user: User, body: Body):
     phq = Phq(
         user=user,
         datetime=datetime.now(tz=timezone.utc),
@@ -85,3 +85,206 @@ def add_answers_to_db(user: User, body: Body):
         q9=get_score(body.get(9)),
     )
     phq.save()
+
+
+def update_avg_and_estm_phq(user: User, body: dict):
+    # update the average of each question and the estimated phq after each response
+    record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    if record:
+        # if record exists, update it
+
+        # if new score come, update average
+        # formula: new_avg = (old_avg * number_of_old_records + new record) / (number_of_old_records + 1)
+        if q := body.get(1):
+            record.estimated_phq += get_score(q) - record.q1.average
+            record.q1.average = (
+                record.q1.average * record.q1.total_records + get_score(q)
+            ) / (record.q1.total_records + 1)
+            record.q1.total_records += 1
+        if q := body.get(2):
+            record.estimated_phq += get_score(q) - record.q2.average
+            record.q2.average = (
+                record.q2.average * record.q2.total_records + get_score(q)
+            ) / (record.q2.total_records + 1)
+            record.q2.total_records += 1
+        if q := body.get(3):
+            record.estimated_phq += get_score(q) - record.q3.average
+            record.q3.average = (
+                record.q3.average * record.q3.total_records + get_score(q)
+            ) / (record.q3.total_records + 1)
+            record.q3.total_records += 1
+        if q := body.get(4):
+            record.estimated_phq += get_score(q) - record.q4.average
+            record.q4.average = (
+                record.q4.average * record.q4.total_records + get_score(q)
+            ) / (record.q4.total_records + 1)
+            record.q4.total_records += 1
+        if q := body.get(5):
+            record.estimated_phq += get_score(q) - record.q5.average
+            record.q5.average = (
+                record.q5.average * record.q5.total_records + get_score(q)
+            ) / (record.q5.total_records + 1)
+            record.q5.total_records += 1
+        if q := body.get(6):
+            record.estimated_phq += get_score(q) - record.q6.average
+            record.q6.average = (
+                record.q6.average * record.q6.total_records + get_score(q)
+            ) / (record.q6.total_records + 1)
+            record.q6.total_records += 1
+        if q := body.get(7):
+            record.estimated_phq += get_score(q) - record.q7.average
+            record.q7.average = (
+                record.q7.average * record.q7.total_records + get_score(q)
+            ) / (record.q7.total_records + 1)
+            record.q7.total_records += 1
+        if q := body.get(8):
+            record.estimated_phq += get_score(q) - record.q8.average
+            record.q8.average = (
+                record.q8.average * record.q8.total_records + get_score(q)
+            ) / (record.q8.total_records + 1)
+            record.q8.total_records += 1
+        if q := body.get(9):
+            record.estimated_phq += get_score(q) - record.q9.average
+            record.q9.average = (
+                record.q9.average * record.q9.total_records + get_score(q)
+            ) / (record.q9.total_records + 1)
+            record.q9.total_records += 1
+
+        # update timestamp
+        record.last_updated = datetime.now(tz=timezone.utc)
+        # write changes to db
+        record.save()
+
+    else:
+        record = AvgAndEstimatedPhqScore(
+            user=user,
+            last_updated=datetime.now(tz=timezone.utc),
+            last_fixed=datetime.now(tz=timezone.utc),
+            q1=SingleQuestionAvgScore(average=get_score(body.get(1)), total_records=1),
+            q2=SingleQuestionAvgScore(average=get_score(body.get(2)), total_records=1),
+            q3=SingleQuestionAvgScore(average=get_score(body.get(3)), total_records=1),
+            q4=SingleQuestionAvgScore(average=get_score(body.get(4)), total_records=1),
+            q5=SingleQuestionAvgScore(average=get_score(body.get(5)), total_records=1),
+            q6=SingleQuestionAvgScore(average=get_score(body.get(6)), total_records=1),
+            q7=SingleQuestionAvgScore(average=get_score(body.get(7)), total_records=1),
+            q8=SingleQuestionAvgScore(average=get_score(body.get(8)), total_records=1),
+            q9=SingleQuestionAvgScore(average=get_score(body.get(9)), total_records=1),
+            estimated_phq=sum(get_score(v) for _, v in body.items()),
+        )
+        record.save()
+
+
+def fix_missing_records(user, last_fix_date: datetime):
+    # this function should take care of user not inputting all three records a day
+    # as well as question not being asked single time for given day
+
+    def daterange(start_date, end_date):
+        for n in range(int((end_date - start_date).days)):
+            yield start_date + timedelta(n)
+
+    for day in daterange(last_fix_date.date(), datetime.now(tz=timezone.utc).date()):
+        records = Phq.objects(
+            user=user,
+            datetime__gte=datetime.combine(day, datetime.min.time()),
+            datetime__lt=datetime.combine(day + timedelta(days=1), datetime.min.time()),
+        )
+        estimated_phq_record = AvgAndEstimatedPhqScore.objects(user=user).first()
+
+        entry = {}
+
+        entry_exists = False
+        for record in records:
+            if record.q1 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[1] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q1.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q2 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[2] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q2.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q3 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[3] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q3.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q4 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[4] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q4.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q5 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[5] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q5.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q6 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[6] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q6.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q7 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[7] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q7.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q8 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[8] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q8.average, version=1
+            )
+
+        entry_exists = False
+        for record in records:
+            if record.q9 is not None:
+                entry_exists = True
+                break
+        if not entry_exists:
+            entry[9] = SingleQuestionResponceFloat(
+                score=estimated_phq_record.q9.average, version=1
+            )
+        print("predicted wale ki entry", entry)
+        update_avg_and_estm_phq(user, entry)
+
+    # update last fixed date
+    record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    record.last_fixed = datetime.now(tz=timezone.utc)
+    record.save()
