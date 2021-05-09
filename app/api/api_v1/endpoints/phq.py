@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
-from typing import Dict
+from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from app.api.deps import get_current_user
 from app.models.phq import AvgAndEstimatedPhqScore, Phq
-from app.schema.phq import PhqScore, Question, SingleQuestionResponce
+from app.schema.phq import PhqScore, Question, SingleQuestionResponse
 
 from .utils.phqutil import (
     add_answers_to_db,
@@ -18,22 +18,22 @@ from .utils.phqutil import (
 router = APIRouter()
 
 
-@router.get("/", response_model=Dict[str, Question])
+@router.get("/", response_model=List[Question])
 def phq9_questions(user=Depends(get_current_user)):
     records = Phq.objects(user=user).all()
     # if no record exists, send all 9 questions
     # otherwise send 3 questions
     if not records:
-        return all_questions()
+        return all_questions(user)
     else:
         return three_questions(user)
 
 
 @router.post("/", status_code=200)
 def phq9_score(
-    user=Depends(get_current_user), body: Dict[int, SingleQuestionResponce] = Body(...)
+    user=Depends(get_current_user), body: List[SingleQuestionResponse] = Body(...)
 ):
-    if body and (len(body.keys()) == 9 or len(body.keys()) == 3):
+    if body and (len(body) == 9 or len(body) == 3):
         record = AvgAndEstimatedPhqScore.objects(user=user).first()
         if record and record.last_fixed.date() < datetime.now(tz=timezone.utc).date():
             fix_missing_records(user, record.last_fixed)
