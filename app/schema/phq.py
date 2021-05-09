@@ -17,7 +17,7 @@ class SingleQuestionResponse(BaseModel):
 
     @validator("qno")
     def validate_qno_value(qno: int):
-        if 1 <= qno <= 0:
+        if 1 <= qno <= 9:
             return qno
         else:
             raise ValueError("qno can be integer value from 1 to 9")
@@ -44,7 +44,7 @@ class SingleQuestionResponseFloat(BaseModel):
 
     @validator("qno")
     def validate_qno_value(qno: int):
-        if 1 <= qno <= 0:
+        if 1 <= qno <= 9:
             return qno
         else:
             raise ValueError("qno can be integer value from 1 to 9")
