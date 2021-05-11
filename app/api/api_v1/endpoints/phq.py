@@ -5,12 +5,13 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from app.api.deps import get_current_user
 from app.models.phq import AvgAndEstimatedPhqScore, Phq
-from app.schema.phq import PhqScore, Question, SingleQuestionResponse
+from app.schema.phq import GraphEntry, PhqScore, Question, SingleQuestionResponse
 
 from .utils.phqutil import (
     add_answers_to_db,
     all_questions,
     fix_missing_records,
+    generate_graph_values,
     three_questions,
     update_avg_and_estm_phq,
 )
@@ -62,3 +63,8 @@ def get_phq_score(user=Depends(get_current_user)):
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Haven't answered any questions yet 😞",
     )
+
+
+@router.get("/graph_values", response_model=List[GraphEntry])
+def send_graph_values(user=Depends(get_current_user)):
+    return generate_graph_values(user)

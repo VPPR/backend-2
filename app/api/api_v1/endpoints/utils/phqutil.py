@@ -2,9 +2,17 @@ import random
 from datetime import date, datetime, timedelta, timezone
 from typing import List
 
+from fastapi.exceptions import HTTPException
+from starlette import status
+
 from app.models.phq import AvgAndEstimatedPhqScore, Phq, SingleQuestionAvgScore
 from app.models.user import User
-from app.schema.phq import Question, SingleQuestionResponse, SingleQuestionResponseFloat
+from app.schema.phq import (
+    GraphEntry,
+    Question,
+    SingleQuestionResponse,
+    SingleQuestionResponseFloat,
+)
 
 QV1 = [
     "I have little interest or pleasure in doing things",
@@ -244,3 +252,43 @@ def fix_missing_records(user, last_fix_date: date):
                 print("")
 
         update_avg_and_estm_phq(user, entry, day, fixed=True)
+
+
+def generate_graph_values(user: User) -> List[GraphEntry]:
+    graph_details = []
+    records = AvgAndEstimatedPhqScore.objects(user=user).order_by("+date")
+    # if no records, raise exception
+    if records is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No data found 😞",
+        )
+
+    phq_records = list(Phq.objects(user=user).order_by("+date"))
+    for record in records:
+        sum_of_avg = 0
+        q9_sum = 0
+        q9_count = 0
+        for i in range(1, 10):
+            sum_of_avg += record.average_scores.get(str(i)).average
+        for i in range(3):
+            # check the 1st three records of phq table in ascending order of date
+            #  if record has same date as average table record, calculate q9 average of that day
+            # otherwise keep it 0
+            if phq_records[0].datetime.date() == record.date:
+                if (score := phq_records[0].answers.get("9")) is not None:
+                    q9_sum += score
+                    q9_count += 1
+                # remove record that has been used so next record become 1st
+                phq_records.pop(0)
+            else:
+                break
+        graph_details.append(
+            GraphEntry(
+                date=record.date,
+                estimated_phq=record.estimated_phq,
+                sum_of_avg=sum_of_avg,
+                q9_avg=(q9_sum / q9_count) if q9_count != 0 else 0,
+            )
+        )
+    return graph_details
