@@ -55,8 +55,7 @@ async def read_activity_csv(
     file: UploadFile = File(...), user=Depends(get_current_user)
 ):
     file_data = await file.read()
-    df = pandas.read_csv(io.BytesIO(file_data))
-    print(df.head())
+    pandas.read_csv(io.BytesIO(file_data))
 
 
 @router.post("/upload", status_code=200)

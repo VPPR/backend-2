@@ -1,6 +1,8 @@
 from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import (
+    BooleanField,
+    DateField,
     DateTimeField,
     DictField,
     EmbeddedDocumentField,
@@ -25,8 +27,8 @@ class SingleQuestionAvgScore(EmbeddedDocument):
 
 class AvgAndEstimatedPhqScore(Document):
     user = ReferenceField(User)
-    last_updated = DateTimeField(required=True)
-    last_fixed = DateTimeField(required=True)
+    date = DateField(required=True)
+    fixed = BooleanField(required=True)
 
     average_scores = DictField(
         child=EmbeddedDocumentField(SingleQuestionAvgScore), required=True

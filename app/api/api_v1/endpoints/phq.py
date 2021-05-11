@@ -34,9 +34,14 @@ def phq9_score(
     user=Depends(get_current_user), body: List[SingleQuestionResponse] = Body(...)
 ):
     if body and (len(body) == 9 or len(body) == 3):
-        record = AvgAndEstimatedPhqScore.objects(user=user).first()
-        if record and record.last_fixed.date() < datetime.now(tz=timezone.utc).date():
-            fix_missing_records(user, record.last_fixed)
+        record = (
+            AvgAndEstimatedPhqScore.objects(user=user, fixed=False)
+            .order_by("+date")
+            .first()
+        )
+        if record and record.date < datetime.now(tz=timezone.utc).date():
+            print("fexing shit")
+            fix_missing_records(user, record.date)
         add_answers_to_db(user, body)
         update_avg_and_estm_phq(user, body)
     else:
