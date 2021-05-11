@@ -52,9 +52,12 @@ def phq9_score(
 
 @router.get("/score", response_model=PhqScore)
 def get_phq_score(user=Depends(get_current_user)):
-    record = record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    record = record = (
+        AvgAndEstimatedPhqScore.objects(user=user).order_by("-date").first()
+    )
     if record:
-        return PhqScore(score=record.estimated_phq, last_answered=record.last_updated)
+        phq_record = Phq.objects(user=user).order_by("-datetime").first()
+        return PhqScore(score=record.estimated_phq, last_answered=phq_record.datetime)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Haven't answered any questions yet 😞",
