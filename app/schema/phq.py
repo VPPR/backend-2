@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, validator
 
@@ -67,3 +67,10 @@ class SingleQuestionResponseFloat(BaseModel):
 class PhqScore(BaseModel):
     score: float
     last_answered: datetime
+
+
+class GraphEntry(BaseModel):
+    date: date
+    estimated_phq: float
+    sum_of_avg: float
+    q9_avg: float

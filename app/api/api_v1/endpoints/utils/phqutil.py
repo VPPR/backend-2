@@ -1,10 +1,18 @@
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import List
+
+from fastapi.exceptions import HTTPException
+from starlette import status
 
 from app.models.phq import AvgAndEstimatedPhqScore, Phq, SingleQuestionAvgScore
 from app.models.user import User
-from app.schema.phq import Question, SingleQuestionResponse, SingleQuestionResponseFloat
+from app.schema.phq import (
+    GraphEntry,
+    Question,
+    SingleQuestionResponse,
+    SingleQuestionResponseFloat,
+)
 
 QV1 = [
     "I have little interest or pleasure in doing things",
@@ -61,9 +69,18 @@ def all_questions(user: User) -> List[Question]:
 
 def three_questions(user: User) -> List[Question]:
     # if user has submitted his first record, then he won't get any more questions on same day
-    record = AvgAndEstimatedPhqScore.objects(user=user).first()
-    if record.first_recorded.date() == datetime.now(tz=timezone.utc).date():
-        return []
+    # record = AvgAndEstimatedPhqScore.objects(user=user).first()
+    record = (
+        Phq.objects(
+            user=user,
+        )
+        .order_by("+datetime")
+        .first()
+    )
+    if record:
+        if record.datetime.date() == datetime.now(tz=timezone.utc).date():
+            return []
+
     # get records for current user that have datetime greater than or equal to todays date at midnight
     # sort the records in desc order of datetime
     todays_records = Phq.objects(
@@ -99,57 +116,102 @@ def add_answers_to_db(user: User, body: List[SingleQuestionResponse]):
     phq.save()
 
 
-def update_avg_and_estm_phq(user: User, body: list):
+def update_avg_and_estm_phq(
+    user: User,
+    body: list,
+    date: date = datetime.now(tz=timezone.utc).date(),
+    fixed=False,
+):
     # update the average of each question and the estimated phq after each response
-    record = AvgAndEstimatedPhqScore.objects(user=user).first()
-    if record:
-        # if record exists, update it
 
-        # if new score come, update average
-        # formula: new_avg = (old_avg * number_of_old_records + new record) / (number_of_old_records + 1)
+    if not body:
+        # if no records for that day, update fixed value only
+        # should only run when fix function is called
+        that_days_record = AvgAndEstimatedPhqScore.objects(user=user, date=date).first()
+        that_days_record.fixed = fixed
+        that_days_record.save()
+        return
+
+    # fetch all records in desc order of date so 1st record will be latest
+    all_records = AvgAndEstimatedPhqScore.objects(user=user).order_by("-date")
+    todays_record = None
+    if all_records:
+        if all_records[0].date == date:
+            todays_record = all_records[0]
+    # if record for that day exists, update that record
+    if todays_record:
         for response in body:
-            previous_entry = record.average_scores.get(str(response.qno))
+            # update values for all questions present in body
+            qno = str(response.qno)
+            score = get_score(response)
+            old_avg = todays_record.average_scores.get(qno).average
+            old_total_records = todays_record.average_scores.get(qno).total_records
+            todays_record.estimated_phq += score - old_avg
             new_entry = SingleQuestionAvgScore(
-                average=(
-                    previous_entry.average * previous_entry.total_records
-                    + get_score(response)
-                )
-                / (previous_entry.total_records + 1),
-                total_records=previous_entry.total_records + 1,
+                average=(old_avg * old_total_records + score) / (old_total_records + 1),
+                total_records=old_total_records + 1,
             )
-            record.estimated_phq += get_score(response) - previous_entry.average
-            record.average_scores.update({str(response.qno): new_entry})
+            todays_record.average_scores.update({qno: new_entry})
+            todays_record.fixed = fixed
+        # save the updated record
+        todays_record.save()
 
-        # update timestamp
-        record.last_updated = datetime.now(tz=timezone.utc)
-        # write changes to db
-        record.save()
-
-    else:
-        # if record doesn't exists, create new record
-        scores = {}
+    # if record for that day doesn't exists but their are previous records
+    # in that case, we take latest record because if todays record doesn't exists, latest record gonna be yesterdays
+    # and create new record for current day using yesterdays record and form values
+    # assuming that we are running fix records function before this function on post request
+    elif all_records:
+        yesterdays_record = all_records[0]
+        estimated_phq = yesterdays_record.estimated_phq
+        average_scores = yesterdays_record.average_scores.copy()
         for response in body:
-            scores.update(
-                {
-                    str(response.qno): SingleQuestionAvgScore(
-                        average=get_score(response), total_records=1
-                    )
-                }
+            qno = str(response.qno)
+            score = get_score(response)
+            yesterdays_avg = yesterdays_record.average_scores.get(qno).average
+            yesterdays_total_records = yesterdays_record.average_scores.get(
+                qno
+            ).total_records
+            estimated_phq += score - yesterdays_avg
+            todays_entry = SingleQuestionAvgScore(
+                average=(yesterdays_avg * yesterdays_total_records + score)
+                / (yesterdays_total_records + 1),
+                total_records=yesterdays_total_records + 1,
             )
-        record = AvgAndEstimatedPhqScore(
+            average_scores.update({qno: todays_entry})
+
+        new_record = AvgAndEstimatedPhqScore(
             user=user,
-            first_recorded=datetime.now(tz=timezone.utc),
-            last_updated=datetime.now(tz=timezone.utc),
-            last_fixed=datetime.now(tz=timezone.utc),
-            average_scores=scores,
-            # this else case runs only for users first response
-            # therefore estimated phq is just sum of all scores
-            estimated_phq=sum(get_score(response) for response in body),
+            date=date,
+            fixed=fixed,
+            average_scores=average_scores,
+            estimated_phq=estimated_phq,
         )
-        record.save()
+
+        # add this new record to db
+        new_record.save()
+
+    # if no record for user exists, first record is created
+    # create new record
+    else:
+        average_scores = {}
+        estimated_phq = 0
+        for response in body:
+            qno = str(response.qno)
+            score = get_score(response)
+            todays_entry = SingleQuestionAvgScore(average=score, total_records=1)
+            estimated_phq += score
+            average_scores.update({qno: todays_entry})
+        new_record = AvgAndEstimatedPhqScore(
+            user=user,
+            date=date,
+            fixed=fixed,
+            average_scores=average_scores,
+            estimated_phq=estimated_phq,
+        )
+        new_record.save()
 
 
-def fix_missing_records(user, last_fix_date: datetime):
+def fix_missing_records(user, last_fix_date: date):
     # this function should take care of user not inputting all three records a day
     # as well as question not being asked single time for given day
 
@@ -158,7 +220,7 @@ def fix_missing_records(user, last_fix_date: datetime):
         for n in range(int((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
-    for day in daterange(last_fix_date.date(), datetime.now(tz=timezone.utc).date()):
+    for day in daterange(last_fix_date, datetime.now(tz=timezone.utc).date()):
         # fetch the records of particular day
         # check for the questiions that haven't answered at all in that days records
         # and create entry for those missing questions using previous day's average
@@ -167,7 +229,9 @@ def fix_missing_records(user, last_fix_date: datetime):
             datetime__gte=datetime.combine(day, datetime.min.time()),
             datetime__lt=datetime.combine(day + timedelta(days=1), datetime.min.time()),
         )
-        estimated_phq_record = AvgAndEstimatedPhqScore.objects(user=user).first()
+        estimated_phq_record = AvgAndEstimatedPhqScore.objects(
+            user=user, date=last_fix_date
+        ).first()
 
         entry = []
 
@@ -185,9 +249,44 @@ def fix_missing_records(user, last_fix_date: datetime):
                     )
                 )
 
-        update_avg_and_estm_phq(user, entry)
+        update_avg_and_estm_phq(user, entry, day, fixed=True)
 
-    # update last fixed date
-    record = AvgAndEstimatedPhqScore.objects(user=user).first()
-    record.last_fixed = datetime.now(tz=timezone.utc)
-    record.save()
+
+def generate_graph_values(user: User) -> List[GraphEntry]:
+    graph_details = []
+    records = AvgAndEstimatedPhqScore.objects(user=user).order_by("+date")
+    # if no records, raise exception
+    if records is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No data found 😞",
+        )
+
+    phq_records = list(Phq.objects(user=user).order_by("+date"))
+    for record in records:
+        sum_of_avg = 0
+        q9_sum = 0
+        q9_count = 0
+        for i in range(1, 10):
+            sum_of_avg += record.average_scores.get(str(i)).average
+        for i in range(3):
+            # check the 1st three records of phq table in ascending order of date
+            #  if record has same date as average table record, calculate q9 average of that day
+            # otherwise keep it 0
+            if phq_records[0].datetime.date() == record.date:
+                if (score := phq_records[0].answers.get("9")) is not None:
+                    q9_sum += score
+                    q9_count += 1
+                # remove record that has been used so next record become 1st
+                phq_records.pop(0)
+            else:
+                break
+        graph_details.append(
+            GraphEntry(
+                date=record.date,
+                estimated_phq=record.estimated_phq,
+                sum_of_avg=sum_of_avg,
+                q9_avg=(q9_sum / q9_count) if q9_count != 0 else 0,
+            )
+        )
+    return graph_details
