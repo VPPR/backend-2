@@ -41,7 +41,6 @@ def phq9_score(
             .first()
         )
         if record and record.date < datetime.now(tz=timezone.utc).date():
-            print("fexing shit")
             fix_missing_records(user, record.date)
         add_answers_to_db(user, body)
         update_avg_and_estm_phq(user, body)
@@ -53,9 +52,7 @@ def phq9_score(
 
 @router.get("/score", response_model=PhqScore)
 def get_phq_score(user=Depends(get_current_user)):
-    record = record = (
-        AvgAndEstimatedPhqScore.objects(user=user).order_by("-date").first()
-    )
+    record = AvgAndEstimatedPhqScore.objects(user=user).order_by("-date").first()
     if record:
         phq_record = Phq.objects(user=user).order_by("-datetime").first()
         return PhqScore(score=record.estimated_phq, last_answered=phq_record.datetime)

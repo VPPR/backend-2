@@ -70,7 +70,7 @@ def all_questions(user: User) -> List[Question]:
 def three_questions(user: User) -> List[Question]:
     # if user has submitted his first record, then he won't get any more questions on same day
     # record = AvgAndEstimatedPhqScore.objects(user=user).first()
-    record = todays_records = (
+    record = (
         Phq.objects(
             user=user,
         )
@@ -224,7 +224,6 @@ def fix_missing_records(user, last_fix_date: date):
         # fetch the records of particular day
         # check for the questiions that haven't answered at all in that days records
         # and create entry for those missing questions using previous day's average
-        print(f"\nfexing record of {day}")
         records = Phq.objects(
             user=user,
             datetime__gte=datetime.combine(day, datetime.min.time()),
@@ -249,7 +248,6 @@ def fix_missing_records(user, last_fix_date: date):
                         version=1,
                     )
                 )
-                print("")
 
         update_avg_and_estm_phq(user, entry, day, fixed=True)
 
