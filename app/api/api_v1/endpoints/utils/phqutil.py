@@ -85,7 +85,7 @@ def three_questions(user: User) -> List[Question]:
     # sort the records in desc order of datetime
     todays_records = Phq.objects(
         user=user,
-        datetime__gte=datetime.combine(datetime.utcnow().date(), datetime.min.time()),
+        datetime__gte=datetime.combine(datetime.now().date(), datetime.min.time()),
     ).order_by("-datetime")
     all_ques = all_questions(user)
     # if no records for that day, send 3 random questions
@@ -93,7 +93,7 @@ def three_questions(user: User) -> List[Question]:
         return random.sample(list(all_ques), k=3)
     if len(todays_records) < 3:
         # if no records past 4 hour, select 3 random questions
-        if (datetime.utcnow() - todays_records[0].datetime).total_seconds() / 60 > 0.5:
+        if (datetime.now(tz=timezone.utc) - todays_records[0].datetime).total_seconds() / 60 > 0.5:
             return random.sample(list(all_ques), k=3)
     return []
 
