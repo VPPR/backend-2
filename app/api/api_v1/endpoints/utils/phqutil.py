@@ -93,7 +93,9 @@ def three_questions(user: User) -> List[Question]:
         return random.sample(list(all_ques), k=3)
     if len(todays_records) < 3:
         # if no records past 4 hour, select 3 random questions
-        if (datetime.now(tz=timezone.utc) - todays_records[0].datetime).total_seconds() / 60 > 0.5:
+        if (
+            datetime.now(tz=timezone.utc) - todays_records[0].datetime
+        ).total_seconds() / 60 > 0.5:
             return random.sample(list(all_ques), k=3)
     return []
 
