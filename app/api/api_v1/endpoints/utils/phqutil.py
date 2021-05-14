@@ -275,14 +275,15 @@ def generate_graph_values(user: User) -> List[GraphEntry]:
             # check the 1st three records of phq table in ascending order of date
             #  if record has same date as average table record, calculate q9 average of that day
             # otherwise keep it 0
-            if phq_records[0].datetime.date() == record.date:
-                if (score := phq_records[0].answers.get("9")) is not None:
-                    q9_sum += score
-                    q9_count += 1
-                # remove record that has been used so next record become 1st
-                phq_records.pop(0)
-            else:
-                break
+            if phq_records:
+                if phq_records[0].datetime.date() == record.date:
+                    if (score := phq_records[0].answers.get("9")) is not None:
+                        q9_sum += score
+                        q9_count += 1
+                    # remove record that has been used so next record become 1st
+                    phq_records.pop(0)
+                else:
+                    break
         graph_details.append(
             GraphEntry(
                 date=record.date,
