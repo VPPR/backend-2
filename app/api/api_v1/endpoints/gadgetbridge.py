@@ -25,7 +25,8 @@ async def gb_to_mongo(
     finally:
         sqlite_file.file.close()
     if magic.from_file(filename, mime=True) != "application/x-sqlite3":
-        return HTTPException(
+        os.remove(filename)
+        raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Wrong File type. Only sqlite file is acceptable",
         )
