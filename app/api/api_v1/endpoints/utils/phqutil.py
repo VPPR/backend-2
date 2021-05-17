@@ -1,6 +1,6 @@
 import random
 from datetime import date, datetime, timedelta, timezone
-from typing import List
+from typing import List, Optional
 
 from fastapi.exceptions import HTTPException
 from starlette import status
@@ -115,17 +115,19 @@ def add_answers_to_db(user: User, body: List[SingleQuestionResponse]):
     for response in body:
         answers.update({str(response.qno): get_score(response)})
     phq = Phq(user=user, datetime=datetime.now(tz=timezone.utc), answers=answers)
+    print(phq.datetime)
     phq.save()
 
 
 def update_avg_and_estm_phq(
     user: User,
     body: list,
-    date: date = datetime.now(tz=timezone.utc).date(),
+    date: Optional[date] = None,
     fixed=False,
 ):
     # update the average of each question and the estimated phq after each response
-
+    if not date:
+        date = datetime.now(tz=timezone.utc).date()
     if not body:
         # if no records for that day, update fixed value only
         # should only run when fix function is called
