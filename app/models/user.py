@@ -18,3 +18,4 @@ class User(Document):
     is_admin = BooleanField(required=True)
     password = StringField(required=True)
     is_active = BooleanField(default=False)
+    is_approved = BooleanField(default=True)

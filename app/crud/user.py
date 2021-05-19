@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from fastapi import status
 from fastapi.exceptions import HTTPException
@@ -8,10 +8,10 @@ from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.admin_approval import Approval
 from app.models.user import User
-from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
+from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf, User as UserSchema
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
+class CRUDUser(CRUDBase[User, UserCreate, UserUpdate, UserSchema]):
     def authenticate(self, email: str, password: str) -> Optional[User]:
         try:
             user = User.objects(email=email).first()
@@ -35,10 +35,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 is_admin=user.is_admin,
                 password=password,
                 is_active=True if not user.is_admin else False,
+                is_approved=True if not user.is_admin else False,
             )
             db_user.save()
-            if user.is_admin:
-                Approval(user=db_user).save()
+            # if user.is_admin:
+            #     Approval(user=db_user).save()
 
         except ValidationError:
             raise HTTPException(
@@ -52,6 +53,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if obj.password is not None:
             obj.password = get_password_hash(obj.password)
         return super().update(model, obj)
+
+    def get_all_unapproved(self, skip: int, limit: int) -> List[UserSchema]:
+        return list(User.object(id=id, is_approved=False).skip(skip).limit(limit))
 
 
 user = CRUDUser(User)
