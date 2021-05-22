@@ -11,6 +11,7 @@ from app.models.user import User
 from app.schema.token import Token
 from app.schema.user import User as UserSchema
 from app.schema.user import UserSignUp
+from .utils.userutils import authenticate
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     OAuth2 compatible token login, get an access token for future requests
     """
 
-    user = crud.user.authenticate(form_data.username, form_data.password)
+    user = authenticate(form_data.username, form_data.password)
     access_token_expires = datetime.now(tz=timezone.utc) + timedelta(
         seconds=settings.TOKEN_EXPIRY
     )
