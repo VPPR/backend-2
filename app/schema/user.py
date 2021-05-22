@@ -3,30 +3,33 @@ from typing import Any, Optional
 from pydantic import BaseModel, EmailStr, validator
 
 
-# Shared properties
 class UserBase(BaseModel):
     fullname: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    is_admin: Optional[bool] = None
 
     @validator("phone")
-    def phone_validator(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            if v.isnumeric() and v.startswith(("6", "7", "8", "9")) and len(v) == 10:
-                return v
-            else:
-                raise ValueError("Phone number not valid")
-        return v
+    def phone_validator(cls, phone: Optional[str]) -> Optional[str]:
+        if phone is None or (
+            phone is not None
+            and phone.isnumeric()
+            and phone.startswith(("6", "7", "8", "9") and len(phone) == 10)
+        ):
+            return phone
+        else:
+            raise ValueError("Phone number not valid")
 
 
-# Properties to receive via API on creation
-class UserCreate(UserBase):
-    email: EmailStr
+class UserSignUp(UserBase):
     fullname: str
-    password: str
-    is_admin: bool
+    email: EmailStr
     phone: str
+    password: str
+
+
+class UserCreate(UserSignUp):
+    is_active: bool
+    is_admin: bool
 
 
 # Properties to receive via API on update
@@ -38,11 +41,16 @@ class UserUpdateSelf(UserBase):
 
 class UserUpdate(UserUpdateSelf):
     is_active: Optional[bool]
+    is_admin: Optional[bool]
 
 
 class User(UserBase):
     id: Any
+    fullname: str
+    email: EmailStr
+    phone: str
     is_active: bool
+    is_admin: bool
 
     @validator("id")
     def validate_id(cls, id):
@@ -50,8 +58,3 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
-
-
-# Additional properties stored in DB
-class UserInDB(User):
-    password: str
