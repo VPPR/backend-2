@@ -10,7 +10,7 @@ from app.core.security import create_access_token
 from app.models.user import User
 from app.schema.token import Token
 from app.schema.user import User as UserSchema
-from app.schema.user import UserCreate
+from app.schema.user import UserSignUp
 
 router = APIRouter()
 
@@ -33,7 +33,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
 
 
 @router.post("/signup", response_model=UserSchema)
-def user_signup(user: UserCreate = Body(...)) -> User:
+def user_signup(user: UserSignUp = Body(...)) -> User:
     try:
         db_user = crud.user.create(user)
         return db_user

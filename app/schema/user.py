@@ -13,7 +13,8 @@ class UserBase(BaseModel):
         if phone is None or (
             phone is not None
             and phone.isnumeric()
-            and phone.startswith(("6", "7", "8", "9") and len(phone) == 10)
+            and phone.startswith(("6", "7", "8", "9"))
+            and len(phone) == 10
         ):
             return phone
         else:

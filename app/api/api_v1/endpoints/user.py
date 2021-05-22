@@ -11,7 +11,7 @@ from app.api.deps import get_current_admin, get_current_user
 from app.models.user import User
 from app.schema.response import Response
 from app.schema.user import User as UserSchema
-from app.schema.user import UserUpdate, UserUpdateSelf
+from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
 
 router = APIRouter()
 
@@ -19,6 +19,14 @@ router = APIRouter()
 @router.get("/", response_model=List[UserSchema])
 def get_users(_: User = Depends(get_current_admin), skip: int = 0, limit: int = 100):
     return crud.user.get_all(skip, limit)
+
+
+@router.post("/", response_model=UserSchema)
+def create_user(
+    _: User = Depends(get_current_admin), new_user: UserCreate = Body(...)
+) -> User:
+    user = crud.user.create(new_user)
+    return user
 
 
 @router.get("/self", response_model=Response)

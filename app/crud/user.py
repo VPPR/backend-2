@@ -1,17 +1,22 @@
 from typing import List, Optional, Union
 
-from fastapi import status
 from fastapi.exceptions import HTTPException
-from mongoengine.errors import ValidationError
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
-from app.models.admin_approval import Approval
 from app.models.user import User
-from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf, User as UserSchema
+from app.schema.user import User as UserSchema
+from app.schema.user import UserCreate, UserSignUp, UserUpdate, UserUpdateSelf
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate, UserSchema]):
+class CRUDUser(
+    CRUDBase[
+        User,
+        Union[UserCreate, UserSignUp],
+        Union[UserUpdate, UserUpdateSelf],
+        UserSchema,
+    ]
+):
     def authenticate(self, email: str, password: str) -> Optional[User]:
         try:
             user = User.objects(email=email).first()
@@ -25,29 +30,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate, UserSchema]):
         except Exception as e:
             raise HTTPException(status_code=e.status_code, detail=e.detail)
 
-    def create(self, user: UserCreate) -> User:
-        password = get_password_hash(user.password)
-        try:
-            db_user = User(
-                fullname=user.fullname,
-                email=user.email,
-                phone=user.phone,
-                is_admin=user.is_admin,
-                password=password,
-                is_active=True if not user.is_admin else False,
-                is_approved=True if not user.is_admin else False,
-            )
-            db_user.save()
-            # if user.is_admin:
-            #     Approval(user=db_user).save()
-
-        except ValidationError:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Unable to process",
-            )
-
-        return db_user
+    def create(self, user: Union[UserCreate, UserSignUp]) -> User:
+        user.password = get_password_hash(user.password)
+        return super().create(user)
 
     def update(self, model: User, obj: Union[UserUpdateSelf, UserUpdate]):
         if obj.password is not None:
