@@ -1,4 +1,4 @@
-from mongoengine import Document
+from mongoengine import Document, CASCADE
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
@@ -15,7 +15,7 @@ from app.models.user import User
 
 
 class Phq(Document):
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
     datetime = DateTimeField(required=True)
     answers = DictField(required=True)
 
@@ -26,7 +26,7 @@ class SingleQuestionAvgScore(EmbeddedDocument):
 
 
 class AvgAndEstimatedPhqScore(Document):
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
     date = DateField(required=True)
     fixed = BooleanField(required=True)
 

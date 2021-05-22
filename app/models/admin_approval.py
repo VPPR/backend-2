@@ -1,8 +1,8 @@
-from mongoengine import Document
+from mongoengine import Document, CASCADE
 from mongoengine.fields import ReferenceField
 
 from .user import User
 
 
 class Approval(Document):
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
