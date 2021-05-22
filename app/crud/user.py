@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import status
 from fastapi.exceptions import HTTPException
@@ -48,7 +48,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         return db_user
 
-    def update_self(self, model: User, obj: UserUpdateSelf):
+    def update(self, model: User, obj: Union[UserUpdateSelf, UserUpdate]):
         if obj.password is not None:
             obj.password = get_password_hash(obj.password)
         return super().update(model, obj)
