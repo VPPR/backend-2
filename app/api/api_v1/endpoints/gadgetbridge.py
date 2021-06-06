@@ -33,17 +33,25 @@ async def gb_to_mongo(
     con = sqlite3.connect(filename)
     # con.cursor().executescript(sqlite_file.decode("utf-8"))
     con.row_factory = sqlite3.Row
-
-    cur = con.execute("SELECT TIMESTAMP,HEART_RATE FROM MI_BAND_ACTIVITY_SAMPLE")
     records = []
-    for record in cur:
-        record = dict(record)
-        gadgetbridge = Gadgetbridge(
-            user=user,
-            timestamp=record.get("TIMESTAMP"),
-            heart_rate=record.get("HEART_RATE"),
+
+    try:
+        cur = con.execute("SELECT TIMESTAMP,HEART_RATE FROM MI_BAND_ACTIVITY_SAMPLE")
+        for record in cur:
+            record = dict(record)
+            gadgetbridge = Gadgetbridge(
+                user=user,
+                timestamp=record.get("TIMESTAMP"),
+                heart_rate=record.get("HEART_RATE"),
+            )
+            records.append(gadgetbridge.to_mongo())
+    except Exception:
+        os.remove(filename)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="File doesn't contain required data",
         )
-        records.append(gadgetbridge.to_mongo())
+
     try:
         Gadgetbridge._get_collection().insert_many(records, ordered=False)
     except BulkWriteError:
