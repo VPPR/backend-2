@@ -50,14 +50,6 @@ async def upload_zip(
                     ziputils.activity_stage(df, user)
 
 
-@router.post("/activity", status_code=200)
-async def read_activity_csv(
-    file: UploadFile = File(...), user=Depends(get_current_user)
-):
-    file_data = await file.read()
-    pandas.read_csv(io.BytesIO(file_data))
-
-
 @router.post("/upload", status_code=200)
 async def upload_file(
     user=Depends(get_current_user),

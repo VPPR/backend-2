@@ -1,4 +1,4 @@
-from mongoengine import Document, CASCADE
+from mongoengine import CASCADE, Document
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,

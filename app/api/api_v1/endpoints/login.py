@@ -10,7 +10,8 @@ from app.core.security import create_access_token
 from app.models.user import User
 from app.schema.token import Token
 from app.schema.user import User as UserSchema
-from app.schema.user import UserCreate
+from app.schema.user import UserSignUp
+from .utils.userutils import authenticate
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     OAuth2 compatible token login, get an access token for future requests
     """
 
-    user = crud.user.authenticate(form_data.username, form_data.password)
+    user = authenticate(form_data.username, form_data.password)
     access_token_expires = datetime.now(tz=timezone.utc) + timedelta(
         seconds=settings.TOKEN_EXPIRY
     )
@@ -33,7 +34,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
 
 
 @router.post("/signup", response_model=UserSchema)
-def user_signup(user: UserCreate = Body(...)) -> User:
+def user_signup(user: UserSignUp = Body(...)) -> User:
     try:
         db_user = crud.user.create(user)
         return db_user

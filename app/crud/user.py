@@ -1,57 +1,34 @@
-from typing import Optional, Union
-
-from fastapi import status
-from fastapi.exceptions import HTTPException
-from mongoengine.errors import ValidationError
-
-from app.core.security import get_password_hash, verify_password
+from typing import List, Union
+from app.core.security import get_password_hash
 from app.crud.base import CRUDBase
-from app.models.admin_approval import Approval
 from app.models.user import User
-from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
+from app.schema.user import User as UserSchema
+from app.schema.user import UserCreate, UserSignUp, UserUpdate, UserUpdateSelf
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def authenticate(self, email: str, password: str) -> Optional[User]:
-        try:
-            user = User.objects(email=email).first()
-            if user:
-                if not verify_password(password, user.password):
-                    raise HTTPException(status_code=401, detail="Incorrect Password")
-                if not user.is_active:
-                    raise HTTPException(status_code=403, detail="User Inactive")
-                return user
-            raise HTTPException(status_code=404, detail="User doesnt exist")
-        except Exception as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
-
-    def create(self, user: UserCreate) -> User:
-        password = get_password_hash(user.password)
-        try:
-            db_user = User(
-                fullname=user.fullname,
-                email=user.email,
-                phone=user.phone,
-                is_admin=user.is_admin,
-                password=password,
-                is_active=True if not user.is_admin else False,
-            )
-            db_user.save()
-            if user.is_admin:
-                Approval(user=db_user).save()
-
-        except ValidationError:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Unable to process",
-            )
-
-        return db_user
+class CRUDUser(
+    CRUDBase[
+        User,
+        Union[UserCreate, UserSignUp],
+        Union[UserUpdate, UserUpdateSelf],
+        UserSchema,
+    ]
+):
+    def create(self, user: Union[UserCreate, UserSignUp]) -> User:
+        user.password = get_password_hash(user.password)
+        return super().create(user)
 
     def update(self, model: User, obj: Union[UserUpdateSelf, UserUpdate]):
         if obj.password is not None:
             obj.password = get_password_hash(obj.password)
         return super().update(model, obj)
+
+    def get_by_email(self, email: str):
+        user = User.objects(email=email).first()
+        return user
+
+    # def get_all_unapproved(self, skip: int, limit: int) -> List[UserSchema]:
+    #     return list(User.object(id=id, is_approved=False).skip(skip).limit(limit))
 
 
 user = CRUDUser(User)

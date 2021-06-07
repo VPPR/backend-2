@@ -9,7 +9,7 @@ UpdateSchema = TypeVar("UpdateSchema", bound=BaseModel)
 GetAllSchema = TypeVar("GetAllSchema", bound=BaseModel)
 
 
-class CRUDBase(Generic[Model, CreateSchema, UpdateSchema]):
+class CRUDBase(Generic[Model, CreateSchema, UpdateSchema, GetAllSchema]):
     def __init__(self, model: Model):
         self.model = model
 
