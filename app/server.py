@@ -7,13 +7,6 @@ from app.core.config import settings
 
 connect(host=settings.MONGO_DETAILS, tz_aware=True)
 
-# User(fullname="Pranav Bakre",
-#                 email="psbakre@yahoo.com",
-#                 phone="9029050534",
-#                 is_admin=True,
-#                 password=get_password_hash("Praan123"),
-#                 is_active=True).save()
-
 app = FastAPI(title="VPPR Depression Detection")
 
 app.add_middleware(

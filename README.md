@@ -1,36 +1,32 @@
-**Backend**
-==
+# **Backend**
 
 Repository for the backend of VPPR Depression Detection System created using [FastAPI](https://fastapi.tiangolo.com/)
 
-Requirements
-==
+# Requirements
+
 - MongoDB
 - Python
 
-Local Development
-==
+# Local Development
+
 - Install the dependencies
 
-    ```bash
-    python -m pip install -r requirements.txt
-    ```
+  ```bash
+  python -m pip install -r requirements.txt
+  ```
+
 - Specify Environment variables
-    
-    ```
-    SECRET_KEY=SECRET KEY for signing JWT token
-    
-    MONGO_DETAILS=MongoDBConnectionString
-    ```
+  ```
+  SECRET_KEY=SECRET KEY for signing JWT token
+  TOKEN_EXPIRY=3600
+  MONGO_DETAILS=MongoDBConnectionString
+  ```
 - Run the project
-    
-    ```bash
-    python -m app
-    ```
+  ```bash
+  python -m app
+  ```
 
-
-Deployment
-==
+# Deployment
 
 <table style="border:0px">
     <tr>
@@ -59,12 +55,12 @@ Deployment
     </tr>
 </table>
 
+# Credits
 
-Credits
-==
-Template derived from 
+Template derived from
+
 - [Rev-AMP / Backend](https://github.com/rev-amp/backend)
 - [markqiu / fastapi-mongodb-realworld-example-app](https://github.com/markqiu/fastapi-mongodb-realworld-example-app)
 - [tiangolo
-/
-full-stack-fastapi-postgresql](https://github.com/tiangolo/full-stack-fastapi-postgresql/)
+  /
+  full-stack-fastapi-postgresql](https://github.com/tiangolo/full-stack-fastapi-postgresql/)

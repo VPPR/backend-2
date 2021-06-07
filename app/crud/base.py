@@ -9,7 +9,7 @@ UpdateSchema = TypeVar("UpdateSchema", bound=BaseModel)
 GetAllSchema = TypeVar("GetAllSchema", bound=BaseModel)
 
 
-class CRUDBase(Generic[Model, CreateSchema, UpdateSchema]):
+class CRUDBase(Generic[Model, CreateSchema, UpdateSchema, GetAllSchema]):
     def __init__(self, model: Model):
         self.model = model
 
@@ -24,19 +24,10 @@ class CRUDBase(Generic[Model, CreateSchema, UpdateSchema]):
         object.save()
         return object
 
-    # def update(self,id:str, obj: UpdateSchema) -> Model:
-    #     object = self.model.objects(id=id).first()
-    #     object.update(**obj.dict())
-    #     return object
-
     def update(self, model: Model, obj: UpdateSchema) -> Model:
         model.update(**obj.dict(exclude_none=True))
         return model.reload()
 
-    # def delete(self, id:str) -> Model:
-    #     object  = self.model.objects(id=id).first()
-    #     object.delete()
-    #     return object
     def delete(self, model: Model) -> Model:
         model.delete()
         return model

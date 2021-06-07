@@ -1,6 +1,6 @@
 import random
 from datetime import date, datetime, timedelta, timezone
-from typing import List
+from typing import List, Optional
 
 from fastapi.exceptions import HTTPException
 from starlette import status
@@ -85,7 +85,7 @@ def three_questions(user: User) -> List[Question]:
     # sort the records in desc order of datetime
     todays_records = Phq.objects(
         user=user,
-        datetime__gte=datetime.combine(datetime.utcnow().date(), datetime.min.time()),
+        datetime__gte=datetime.combine(datetime.now().date(), datetime.min.time()),
     ).order_by("-datetime")
     all_ques = all_questions(user)
     # if no records for that day, send 3 random questions
@@ -93,7 +93,9 @@ def three_questions(user: User) -> List[Question]:
         return random.sample(list(all_ques), k=3)
     if len(todays_records) < 3:
         # if no records past 4 hour, select 3 random questions
-        if (datetime.utcnow() - todays_records[0].datetime).total_seconds() / 60 > 0.5:
+        if (
+            datetime.now(tz=timezone.utc) - todays_records[0].datetime
+        ).total_seconds() / 60 > 0.5:
             return random.sample(list(all_ques), k=3)
     return []
 
@@ -113,17 +115,19 @@ def add_answers_to_db(user: User, body: List[SingleQuestionResponse]):
     for response in body:
         answers.update({str(response.qno): get_score(response)})
     phq = Phq(user=user, datetime=datetime.now(tz=timezone.utc), answers=answers)
+    print(phq.datetime)
     phq.save()
 
 
 def update_avg_and_estm_phq(
     user: User,
     body: list,
-    date: date = datetime.now(tz=timezone.utc).date(),
+    date: Optional[date] = None,
     fixed=False,
 ):
     # update the average of each question and the estimated phq after each response
-
+    if not date:
+        date = datetime.now(tz=timezone.utc).date()
     if not body:
         # if no records for that day, update fixed value only
         # should only run when fix function is called
@@ -273,14 +277,15 @@ def generate_graph_values(user: User) -> List[GraphEntry]:
             # check the 1st three records of phq table in ascending order of date
             #  if record has same date as average table record, calculate q9 average of that day
             # otherwise keep it 0
-            if phq_records[0].datetime.date() == record.date:
-                if (score := phq_records[0].answers.get("9")) is not None:
-                    q9_sum += score
-                    q9_count += 1
-                # remove record that has been used so next record become 1st
-                phq_records.pop(0)
-            else:
-                break
+            if phq_records:
+                if phq_records[0].datetime.date() == record.date:
+                    if (score := phq_records[0].answers.get("9")) is not None:
+                        q9_sum += score
+                        q9_count += 1
+                    # remove record that has been used so next record become 1st
+                    phq_records.pop(0)
+                else:
+                    break
         graph_details.append(
             GraphEntry(
                 date=record.date,

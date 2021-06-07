@@ -1,4 +1,4 @@
-from mongoengine import Document
+from mongoengine import CASCADE, Document
 from mongoengine.fields import (
     FloatField,
     IntField,
@@ -17,7 +17,7 @@ class Activity(Document):
     run_distance = IntField(required=True)
     calories = IntField(required=True)
 
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
 
     meta = {
         "index_background": True,
@@ -36,7 +36,7 @@ class Sleep(Document):
     sleep_start_time = LongField(required=True)
     sleep_stop_time = LongField(required=True)
 
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
 
     meta = {
         "index_background": True,
@@ -57,7 +57,7 @@ class Sport(Document):
     avg_pace = FloatField(required=True)
     calories = IntField(required=True)
 
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
 
     meta = {
         "index_background": True,
@@ -80,7 +80,7 @@ class ActivityStage(Document):
     calories = IntField(required=True)
     steps = IntField(required=True)
 
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
 
     meta = {
         "index_background": True,
@@ -100,7 +100,7 @@ class HeartrateAuto(Document):
     time = StringField(required=True)
     heart_rate = IntField(required=True)
 
-    user = ReferenceField(User)
+    user = ReferenceField(User, reverse_delete_rule=CASCADE)
 
     meta = {
         "index_background": True,

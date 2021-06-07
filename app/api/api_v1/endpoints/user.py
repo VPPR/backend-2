@@ -11,7 +11,7 @@ from app.api.deps import get_current_admin, get_current_user
 from app.models.user import User
 from app.schema.response import Response
 from app.schema.user import User as UserSchema
-from app.schema.user import UserUpdate, UserUpdateSelf
+from app.schema.user import UserCreate, UserUpdate, UserUpdateSelf
 
 router = APIRouter()
 
@@ -19,6 +19,14 @@ router = APIRouter()
 @router.get("/", response_model=List[UserSchema])
 def get_users(_: User = Depends(get_current_admin), skip: int = 0, limit: int = 100):
     return crud.user.get_all(skip, limit)
+
+
+@router.post("/", response_model=UserSchema)
+def create_user(
+    _: User = Depends(get_current_admin), new_user: UserCreate = Body(...)
+) -> User:
+    user = crud.user.create(new_user)
+    return user
 
 
 @router.get("/self", response_model=Response)
@@ -37,16 +45,7 @@ def delete_self(user: User = Depends(get_current_user)) -> User:
 def update_self(
     user: User = Depends(get_current_user), update: UserUpdateSelf = Body(...)
 ) -> User:
-    # update = UserUpdate(fullname=fullname, email=email, phone=phone, password=password)
-    # if fullname is not None:
-    #     update.fullname = fullname
-    # if email is not None:
-    #     update.email = email
-    # if phone is not None and is_phone_valid(phone):
-    #     update.phone = phone
-    # if password is not None:
-    #     update.password = get_password_hash(password)
-    crud.user.update_self(user, update)
+    crud.user.update(user, update)
     return user
 
 
@@ -76,18 +75,6 @@ def update_user_by_id(
             status_code=status.HTTP_404_NOT_FOUND, detail="User doesnt exist"
         )
     queried_user = crud.user.update(queried_user, update)
-
-    # if update.fullname is not None:
-    #     queried_user.fullname = update.fullname
-    # if update.email is not None:
-    #     queried_user.email = update.email
-    # if update.phone is not None and is_phone_valid(update.phone):
-    #     queried_user.phone = update.phone
-    # if update.password is not None:
-    #     queried_user.password = get_password_hash(update.password)
-    # if update.is_admin is not None:
-    #     queried_user.is_admin = update.is_admin
-    # queried_user.save()
     return queried_user
 
 
