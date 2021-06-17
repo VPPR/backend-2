@@ -1,4 +1,5 @@
-from typing import List, Union
+from typing import Union
+
 from app.core.security import get_password_hash
 from app.crud.base import CRUDBase
 from app.models.user import User
