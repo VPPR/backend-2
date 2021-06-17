@@ -11,6 +11,7 @@ from app.models.user import User
 from app.schema.token import Token
 from app.schema.user import User as UserSchema
 from app.schema.user import UserSignUp
+
 from .utils.userutils import authenticate
 
 router = APIRouter()

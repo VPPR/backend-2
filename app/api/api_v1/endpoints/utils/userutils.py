@@ -1,8 +1,10 @@
+from typing import Optional
+
 from fastapi.exceptions import HTTPException
+
+from app import crud
 from app.core.security import verify_password
 from app.models.user import User
-from typing import Optional
-from app import crud
 
 
 def authenticate(email: str, password: str) -> Optional[User]:
