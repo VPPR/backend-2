@@ -15,28 +15,35 @@ router = APIRouter()
 
 
 @router.post("/")
-async def gb_to_mongo(
+async def gadgetbridge(
     user: User = Depends(get_current_user), sqlite_file: UploadFile = File(...)
 ):
-    filename = str(uuid.uuid4()) + ".db"
+
+    # Check if file uploaded is of type sqlite3
+    if magic.from_buffer(sqlite_file.file.read(), mime=True) != "application/x-sqlite3":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Wrong File type. Only sqlite file is acceptable",
+        )
+
+    # Create directory gadgetbridge to prevent the main directory from being flooded with sqlite db files
+    if not os.path.exists("gadgetbridge"):
+        os.makedirs("gadgetbridge")
+
+    # Create temp db file
+    filename = "gadgetbridge/" + str(uuid.uuid4()) + ".db"
+    sqlite_file.file.seek(0)
     try:
         with open(filename, "wb") as f:
             shutil.copyfileobj(sqlite_file.file, f)
     finally:
         sqlite_file.file.close()
-    if magic.from_file(filename, mime=True) != "application/x-sqlite3":
-        os.remove(filename)
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Wrong File type. Only sqlite file is acceptable",
-        )
     con = sqlite3.connect(filename)
-    # con.cursor().executescript(sqlite_file.decode("utf-8"))
     con.row_factory = sqlite3.Row
     records = []
-
+    cur = con.cursor()
     try:
-        cur = con.execute("SELECT TIMESTAMP,HEART_RATE FROM MI_BAND_ACTIVITY_SAMPLE")
+        cur.execute("SELECT TIMESTAMP,HEART_RATE FROM MI_BAND_ACTIVITY_SAMPLE")
         for record in cur:
             record = dict(record)
             gadgetbridge = Gadgetbridge(
@@ -46,12 +53,14 @@ async def gb_to_mongo(
             )
             records.append(gadgetbridge.to_mongo())
     except Exception:
-        os.remove(filename)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="File doesn't contain required data",
         )
-
+    finally:
+        cur.close()
+        con.close()
+        os.remove(filename)
     try:
         Gadgetbridge._get_collection().insert_many(records, ordered=False)
     except BulkWriteError:
@@ -60,4 +69,3 @@ async def gb_to_mongo(
         )
     except Exception as e:
         print({"error": str(e)})
-    os.remove(filename)
