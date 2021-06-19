@@ -1,15 +1,16 @@
-from app.models.gadgetbridge import Gadgetbridge
 import os
 import shutil
-import uuid
 import sqlite3
-from fastapi.datastructures import UploadFile
-from fastapi.exceptions import HTTPException
-from fastapi import status
+import uuid
+
 import magic
 import pandas
+from fastapi import status
+from fastapi.datastructures import UploadFile
+from fastapi.exceptions import HTTPException
 from pymongo.errors import BulkWriteError
 
+from app.models.gadgetbridge import Gadgetbridge
 from app.models.user import User
 from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
 
