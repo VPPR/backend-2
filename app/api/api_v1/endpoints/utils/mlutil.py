@@ -41,3 +41,56 @@ def do_ml_stuff(user: User):
     df.drop(df[df["heart_rate"] == -1].index, inplace=True)
     df = df.reset_index()
     df = df.drop(columns=["index"])
+    generate_periods(df)
+
+
+# this class cause i'mma just copy ipynb stuff without thinking too much
+class HRVDuration:
+    def __init__(self, start, finish):
+        self.start = start
+        self.finish = finish
+
+
+def printPeriods(periods, df):
+    print("________________________")
+    for i in range(0, len(periods)):
+        # print(str(df.iloc[periods[i].start,0])+" ---> "+str(df.iloc[periods[i].finish,0]))
+        print(
+            str(
+                pandas.to_datetime(df.iloc[periods[i].start, 0], unit="s")
+                .tz_localize("UTC")
+                .tz_convert("Asia/Kolkata")
+            )
+            + " ---> "
+            + str(
+                pandas.to_datetime(df.iloc[periods[i].finish, 0], unit="s")
+                .tz_localize("UTC")
+                .tz_convert("Asia/Kolkata")
+            )
+        )
+    print("________________________")
+
+
+def generate_periods(df: pandas.DataFrame):
+    periods = []
+    d = HRVDuration(start=0, finish=0)
+    k = 0
+    while k < len(df):
+        k = d.finish + 1
+        for i in range(k, len(df) - 1):
+            x0 = df.iloc[i, 0]
+            y0 = df.iloc[i + 1, 0]
+            if y0 - x0 < 30:
+                d.start = i
+                break
+        for i in range(d.start, len(df) - 1):
+            if df.iloc[i + 1, 0] - df.iloc[i, 0] < 30:
+                d.finish = i + 1
+            else:
+                break
+        if (len(periods) > 0 and periods[-1].finish != d.finish) or len(periods) == 0:
+            if d.finish - d.start > 10:
+                periods.append(HRVDuration(d.start, d.finish))
+        else:
+            break
+    printPeriods(periods, df)
