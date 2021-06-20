@@ -10,6 +10,7 @@ from fastapi.datastructures import UploadFile
 from fastapi.exceptions import HTTPException
 from pymongo.errors import BulkWriteError
 
+from app.api.api_v1.endpoints.utils.mlutil import do_ml_stuff
 from app.models.gadgetbridge import Gadgetbridge
 from app.models.user import User
 from app.models.zip import Activity, ActivityStage, HeartrateAuto, Sleep, Sport
@@ -185,3 +186,6 @@ async def gadgetbridge(sqlite_file: UploadFile, user: User):
         )
     except Exception as e:
         print({"error": str(e)})
+
+    # invoke the function that will make ML go brrrr
+    do_ml_stuff(user)
