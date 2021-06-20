@@ -58,6 +58,7 @@ async def upload_file(
     sleep: UploadFile = File(None, alias="SLEEP"),
     activity_stage: UploadFile = File(None, alias="ACTIVITY_STAGE"),
     sport: UploadFile = File(None, alias="SPORT"),
+    gadgetbridge: UploadFile = File(None, alias="GADGETBRIDGE"),
 ):
     async def get_df(file: UploadFile):
         return pandas.read_csv(io.BytesIO(await file.read()))
@@ -72,3 +73,5 @@ async def upload_file(
         create_task(ziputils.activity_stage(await get_df(activity_stage), user))
     if sport:
         create_task(ziputils.sport(await get_df(sport), user))
+    if gadgetbridge:
+        create_task(ziputils.gadgetbridge(gadgetbridge, user))
