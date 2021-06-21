@@ -1,8 +1,21 @@
+import pickle
+from typing import List
+
+import numpy
 import pandas
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 from app.models.gadgetbridge import Gadgetbridge
 from app.models.predictions import Predictions
 from app.models.user import User
+
+# when you load model from pickle file, it needs the libraries to be imported
+# but, since you are not creating the objects of this clasifiers,
+# ./format will remove them while formatting, breaking the code
+# bellow two lines prevent that from happening
+_ = DecisionTreeClassifier()
+_ = AdaBoostClassifier()
 
 
 def do_ml_stuff(user: User):
@@ -41,7 +54,7 @@ def do_ml_stuff(user: User):
     df.drop(df[df["heart_rate"] == -1].index, inplace=True)
     df = df.reset_index()
     df = df.drop(columns=["index"])
-    generate_periods(df)
+    generate_periods(user, df)
 
 
 # this class cause i'mma just copy ipynb stuff without thinking too much
@@ -52,7 +65,7 @@ class HRVDuration:
 
 
 def printPeriods(periods, df):
-    print("________________________")
+    print("______Printng Periods_________")
     for i in range(0, len(periods)):
         # print(str(df.iloc[periods[i].start,0])+" ---> "+str(df.iloc[periods[i].finish,0]))
         print(
@@ -68,10 +81,9 @@ def printPeriods(periods, df):
                 .tz_convert("Asia/Kolkata")
             )
         )
-    print("________________________")
 
 
-def generate_periods(df: pandas.DataFrame):
+def generate_periods(user: User, df: pandas.DataFrame):
     periods = []
     d = HRVDuration(start=0, finish=0)
     k = 0
@@ -94,3 +106,50 @@ def generate_periods(df: pandas.DataFrame):
         else:
             break
     printPeriods(periods, df)
+    calculate_sd_values(user, periods, df)
+
+
+def bpm_to_rr(bpm):
+    return 60000 / bpm
+
+
+def calculate_sd_values(user: User, periods: List[HRVDuration], df: pandas.DataFrame):
+    predictions_without_prediction = []
+    for p in periods:
+        x = []
+        y = []
+        for t in range(p.start, p.finish - 1):
+            x.append(bpm_to_rr(df.iloc[t, 1]))
+            y.append(bpm_to_rr(df.iloc[t + 1, 1]))
+        sd1 = numpy.sqrt(0.5) * numpy.std(numpy.array(y) - numpy.array(x))
+        sd2 = numpy.sqrt(0.5) * numpy.std(numpy.array(y) + numpy.array(x))
+        predictions_without_prediction.append(
+            Predictions(
+                user=user,
+                start_time=df.iloc[p.start, 0],
+                end_time=df.iloc[p.finish, 0],
+                sd1=sd1,
+                sd2=sd2,
+                depressed=False,
+            )
+        )
+    print(
+        "\n_____Print records before prediction____________________________________________"
+    )
+    for i in predictions_without_prediction:
+        print(i.to_json())
+    predict_stuff_and_add_to_db(user, predictions_without_prediction)
+
+
+def predict_stuff_and_add_to_db(user: User, prediction_objects: List[Predictions]):
+    model = pickle.load(open("model.sav", "rb"))
+    for i in range(len(prediction_objects)):
+        if model.predict([[prediction_objects[i].sd1, prediction_objects[i].sd2]]) == [
+            1
+        ]:
+            prediction_objects[i].depressed = True
+    print(
+        "\n_____Print records after prediction____________________________________________"
+    )
+    for i in prediction_objects:
+        print(i.to_json())

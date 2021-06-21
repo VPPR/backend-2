@@ -14,8 +14,8 @@ class Predictions(Document):
     user = ReferenceField(User)
     start_time = LongField(required=True)
     end_time = IntField(required=True)
-    sd_1 = FloatField(required=True)
-    sd_2 = FloatField(required=True)
+    sd1 = FloatField(required=True)
+    sd2 = FloatField(required=True)
     depressed = BooleanField(required=True)
 
     meta = {
