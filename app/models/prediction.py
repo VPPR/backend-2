@@ -10,7 +10,7 @@ from mongoengine.fields import (
 from app.models.user import User
 
 
-class Predictions(Document):
+class Prediction(Document):
     user = ReferenceField(User)
     start_time = LongField(required=True)
     end_time = IntField(required=True)
