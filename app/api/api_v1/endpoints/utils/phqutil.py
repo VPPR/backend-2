@@ -115,7 +115,6 @@ def add_answers_to_db(user: User, body: List[SingleQuestionResponse]):
     for response in body:
         answers.update({str(response.qno): get_score(response)})
     phq = Phq(user=user, datetime=datetime.now(tz=timezone.utc), answers=answers)
-    print(phq.datetime)
     phq.save()
 
 

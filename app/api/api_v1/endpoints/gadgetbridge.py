@@ -1,16 +1,8 @@
-import os
-import shutil
-import sqlite3
-import uuid
+from fastapi import APIRouter, Depends, File, UploadFile
 
-import magic
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from mongoengine.errors import BulkWriteError
-
-from app.api.deps import get_current_user
-from app.models.gadgetbridge import Gadgetbridge
-from app.models.user import User
 from app.api.api_v1.endpoints.utils import ziputils
+from app.api.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
