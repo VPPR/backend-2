@@ -55,7 +55,6 @@ def do_ml_stuff(user: User):
     df.drop(df[df["heart_rate"] == -1].index, inplace=True)
     df = df.reset_index()
     df = df.drop(columns=["index"])
-    print(df)
     generate_periods(user, df)
 
 
@@ -64,25 +63,6 @@ class HRVDuration:
     def __init__(self, start, finish):
         self.start = start
         self.finish = finish
-
-
-def printPeriods(periods, df):
-    print("______Printng Periods_________")
-    for i in range(0, len(periods)):
-        # print(str(df.iloc[periods[i].start,0])+" ---> "+str(df.iloc[periods[i].finish,0]))
-        print(
-            str(
-                pandas.to_datetime(df.iloc[periods[i].start, 0], unit="s")
-                .tz_localize("UTC")
-                .tz_convert("Asia/Kolkata")
-            )
-            + " ---> "
-            + str(
-                pandas.to_datetime(df.iloc[periods[i].finish, 0], unit="s")
-                .tz_localize("UTC")
-                .tz_convert("Asia/Kolkata")
-            )
-        )
 
 
 def generate_periods(user: User, df: pandas.DataFrame):
@@ -107,7 +87,6 @@ def generate_periods(user: User, df: pandas.DataFrame):
                 periods.append(HRVDuration(d.start, d.finish))
         else:
             break
-    printPeriods(periods, df)
     calculate_sd_values(user, periods, df)
 
 
@@ -150,11 +129,6 @@ def predict_stuff_and_add_to_db(
                 else False,
             ).to_mongo()
         )
-    print(
-        "\n_____Print records after prediction____________________________________________"
-    )
-    for i in records:
-        print(i)
     try:
         Prediction._get_collection().insert_many(records, ordered=False)
     except BulkWriteError:
