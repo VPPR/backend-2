@@ -293,4 +293,6 @@ def generate_graph_values(user: User) -> List[GraphEntry]:
                 q9_avg=(q9_sum / q9_count) if q9_count != 0 else 0,
             )
         )
+    if len(graph_details) > 14:
+        graph_details = graph_details[14:]
     return graph_details
