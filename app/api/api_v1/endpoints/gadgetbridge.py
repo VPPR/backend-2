@@ -7,7 +7,7 @@ from app.models.user import User
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", status_code=200)
 async def gadgetbridge(
     user: User = Depends(get_current_user), sqlite_file: UploadFile = File(...)
 ):
