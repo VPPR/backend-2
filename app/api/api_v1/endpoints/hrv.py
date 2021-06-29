@@ -10,7 +10,7 @@ from app.schema.hrv import Hrv
 router = APIRouter()
 
 
-@router.post("/", response_model=List[Hrv])
+@router.get("/", response_model=List[Hrv])
 def hrv_predictions(count: Optional[int] = None, user=Depends(get_current_user)):
     records = (
         Prediction.objects(user=user).order_by("-start_time").all()
