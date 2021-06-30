@@ -294,5 +294,5 @@ def generate_graph_values(user: User) -> List[GraphEntry]:
             )
         )
     if len(graph_details) > 14:
-        graph_details = graph_details[14:]
+        graph_details = graph_details[-14:]
     return graph_details
