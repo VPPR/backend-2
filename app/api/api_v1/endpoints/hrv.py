@@ -17,6 +17,7 @@ def hrv_predictions(count: Optional[int] = None, user=Depends(get_current_user))
         if not count
         else Prediction.objects(user=user).order_by("-start_time").limit(count)
     )
+
     predictions = []
     if not records:
         return []
@@ -24,6 +25,7 @@ def hrv_predictions(count: Optional[int] = None, user=Depends(get_current_user))
         for i in records:
             predictions.append(
                 Hrv(
+                    id=str(i.id),
                     start_time=datetime.fromtimestamp(i.start_time, tz=timezone.utc),
                     end_time=datetime.fromtimestamp(i.end_time, tz=timezone.utc),
                     sd1=i.sd1,
