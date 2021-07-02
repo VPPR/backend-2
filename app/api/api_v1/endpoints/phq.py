@@ -50,7 +50,7 @@ def phq9_score(
         )
 
 
-@router.get("/score", response_model=PhqScore)
+@router.get("/score/", response_model=PhqScore)
 def get_phq_score(user=Depends(get_current_user)):
     record = AvgAndEstimatedPhqScore.objects(user=user).order_by("-date").first()
     if record:
@@ -62,6 +62,6 @@ def get_phq_score(user=Depends(get_current_user)):
     )
 
 
-@router.get("/graph_values", response_model=List[GraphEntry])
+@router.get("/graph_values/", response_model=List[GraphEntry])
 def send_graph_values(user=Depends(get_current_user)):
     return generate_graph_values(user)

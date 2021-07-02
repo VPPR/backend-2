@@ -29,19 +29,19 @@ def create_user(
     return user
 
 
-@router.get("/self", response_model=Response)
+@router.get("/self/", response_model=Response)
 def get_self(user: User = Depends(get_current_user)) -> Response:
     return Response(
         message="Data retrieved successfully", detail=UserSchema.from_orm(user)
     )
 
 
-@router.delete("/self", response_model=UserSchema)
+@router.delete("/self/", response_model=UserSchema)
 def delete_self(user: User = Depends(get_current_user)) -> User:
     return crud.user.delete(user)
 
 
-@router.put("/self", response_model=UserSchema)
+@router.put("/self/", response_model=UserSchema)
 def update_self(
     user: User = Depends(get_current_user), update: UserUpdateSelf = Body(...)
 ) -> User:
@@ -49,7 +49,7 @@ def update_self(
     return user
 
 
-@router.get("/{id}", response_model=UserSchema)
+@router.get("/{id}/", response_model=UserSchema)
 def get_user_by_id(
     user: User = Depends(get_current_admin), id: str = Path(...)
 ) -> User:
@@ -61,7 +61,7 @@ def get_user_by_id(
     return queried_user
 
 
-@router.put("/{id}", response_model=UserSchema)
+@router.put("/{id}/", response_model=UserSchema)
 def update_user_by_id(
     user: User = Depends(get_current_admin),
     id: str = Path(...),
@@ -78,7 +78,7 @@ def update_user_by_id(
     return queried_user
 
 
-@router.delete("/{id}", response_model=UserSchema)
+@router.delete("/{id}/", response_model=UserSchema)
 def delete_user_by_id(
     user: User = Depends(get_current_admin), id: str = Path(...)
 ) -> User:

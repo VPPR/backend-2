@@ -17,7 +17,7 @@ from .utils.userutils import authenticate
 router = APIRouter()
 
 
-@router.post("/login/access-token", response_model=Token)
+@router.post("/login/access-token/", response_model=Token)
 def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
@@ -34,7 +34,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Toke
     )
 
 
-@router.post("/signup", response_model=UserSchema)
+@router.post("/signup/", response_model=UserSchema)
 def user_signup(user: UserSignUp = Body(...)) -> User:
     try:
         db_user = crud.user.create(user)
