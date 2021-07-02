@@ -39,15 +39,15 @@ async def upload_zip(
                     )
                 df = pandas.read_csv(io.BytesIO(fileobj))
                 if folder == "ACTIVITY":
-                    ziputils.activity(df, user)
+                    await ziputils.activity(df, user)
                 elif folder == "SLEEP":
-                    ziputils.sleep(df, user)
+                    await ziputils.sleep(df, user)
                 elif folder == "HEARTRATE_AUTO":
-                    ziputils.heartrate_auto(df, user)
+                    await ziputils.heartrate_auto(df, user)
                 elif folder == "SPORT":
-                    ziputils.sport(df, user)
+                    await ziputils.sport(df, user)
                 elif folder == "ACTIVITY_STAGE":
-                    ziputils.activity_stage(df, user)
+                    await ziputils.activity_stage(df, user)
 
 
 @router.post("/upload/", status_code=200)
