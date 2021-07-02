@@ -12,7 +12,7 @@ from app.api.deps import get_current_user
 router = APIRouter()
 
 
-@router.post("/zip")
+@router.post("/zip/")
 async def upload_zip(
     file: UploadFile = File(...),
     zip_password: str = Body(...),
@@ -50,7 +50,7 @@ async def upload_zip(
                     ziputils.activity_stage(df, user)
 
 
-@router.post("/upload", status_code=200)
+@router.post("/upload/", status_code=200)
 async def upload_file(
     user=Depends(get_current_user),
     activity: UploadFile = File(None, alias="ACTIVITY"),
